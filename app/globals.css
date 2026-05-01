@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── APL Design Tokens ───────────────────────────────────────────────────── */
+:root {
+  --apl-ink:     #0a0a0a;
+  --apl-yellow:  #FFC31F;
+  --apl-red:     #E11D2A;
+  --apl-surface: #181818;
+  --apl-line:    rgba(255, 255, 255, 0.1);
+  --apl-line-strong: rgba(255, 255, 255, 0.2);
+  --apl-muted:   rgba(255, 255, 255, 0.55);
+  --apl-body:    rgba(255, 255, 255, 0.75);
+
+  /* Typography */
+  --font-inter:  "Inter", sans-serif;
+  --font-anton:  "Anton", sans-serif;
+  --font-mono:   "JetBrains Mono", monospace;
+}
+
+/* ─── Base reset ──────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--apl-ink);
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--apl-ink);
+    color: #ffffff;
+    overflow-x: hidden;
+    font-family: var(--font-inter);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+}
+
+/* ─── Utility classes ─────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Hide scrollbar cross-browser */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Outlined text (hero headline effect) */
+  .text-stroke-yellow {
+    -webkit-text-stroke: 1.5px var(--apl-yellow);
+    color: transparent;
+  }
+  .text-stroke-ink {
+    -webkit-text-stroke: 1.5px var(--apl-ink);
+    color: transparent;
+  }
+
+  /* APL radial gradient page background */
+  .bg-apl-page {
+    background:
+      radial-gradient(ellipse at top,    rgba(255, 195, 31, 0.08), transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(225,  29, 42, 0.06), transparent 50%),
+      var(--apl-ink);
+  }
+
+  /* Diagonal stripe overlay */
+  .bg-stripe {
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.06) 0 2px,
+      transparent 2px 16px
+    );
+  }
+
+  /* Grid overlay used in hero */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+
+  /* Shimmer on buttons */
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    transition: transform 0s;
+  }
+  .shimmer:hover::after {
+    transform: translateX(100%);
+    transition: transform 0.5s ease;
+  }
+
+  /* Active press scale */
+  .active-scale:active {
+    transform: scale(0.97);
+  }
+}
