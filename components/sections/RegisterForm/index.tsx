@@ -1,0 +1,225 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import Link from "next/link";
+import { uploadImage } from "@/lib/supabase";
+import type { FormData } from "@/types";
+
+import { type UploadItem, type FieldErrors, STEPS, INITIAL, MAX_SIZE } from "./types";
+import { validateStep } from "./validation";
+import { StepperBar } from "./StepperBar";
+import { SuccessScreen } from "./SuccessScreen";
+import { Step1Personal } from "./steps/Step1Personal";
+import { Step2Cricket } from "./steps/Step2Cricket";
+import { Step3Sabha } from "./steps/Step3Sabha";
+import { Step4Photos } from "./steps/Step4Photos";
+
+export default function RegisterForm() {
+  const [step,      setStep]      = useState(1);
+  const [data,      setData]      = useState<FormData>(INITIAL);
+  const [errors,    setErrors]    = useState<FieldErrors>({});
+  const [uploads,   setUploads]   = useState<UploadItem[]>([]);
+  const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [loading,   setLoading]   = useState(false);
+  const [success,   setSuccess]   = useState(false);
+
+  /* ── Single field change handler (clears its own error) ───────────────── */
+
+  const handleChange = useCallback((key: keyof FormData, value: string) => {
+    setData((d) => ({ ...d, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: undefined }));
+  }, []);
+
+  /* ── Image upload / remove ────────────────────────────────────────────── */
+
+  const handleAddImages = useCallback((files: FileList) => {
+    const valid = Array.from(files).filter((f) => {
+      if (f.size > MAX_SIZE) { setUploadErr(`"${f.name}" exceeds 5 MB.`); return false; }
+      return true;
+    });
+    if (!valid.length) return;
+    setUploadErr(null);
+
+    const items: UploadItem[] = valid.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      localUrl:   URL.createObjectURL(file),
+      storageUrl: null,
+      uploading:  true,
+      error:      null,
+    }));
+
+    setUploads((p) => [...p, ...items]);
+
+    items.forEach(async (item) => {
+      const path = `registrations/${Date.now()}-${item.id}/${item.file.name}`;
+      try {
+        const url = await uploadImage(item.file, path);
+        setUploads((p) => p.map((u) => u.id === item.id ? { ...u, uploading: false, storageUrl: url } : u));
+        setData((d) => ({ ...d, imageUrls: [...d.imageUrls, url] }));
+      } catch (err) {
+        setUploads((p) => p.map((u) => u.id === item.id ? { ...u, uploading: false, error: (err as Error).message } : u));
+      }
+    });
+  }, []);
+
+  const handleRemoveImage = useCallback((id: string) => {
+    setUploads((prev) => {
+      const item = prev.find((u) => u.id === id);
+      if (item) {
+        URL.revokeObjectURL(item.localUrl);
+        if (item.storageUrl)
+          setData((d) => ({ ...d, imageUrls: d.imageUrls.filter((u) => u !== item.storageUrl) }));
+      }
+      return prev.filter((u) => u.id !== id);
+    });
+  }, []);
+
+  /* ── Navigation ───────────────────────────────────────────────────────── */
+
+  const handleNext = async () => {
+    if (step < 4) {
+      const errs = validateStep(step, data);
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setErrors({});
+      setStep((s) => s + 1);
+      return;
+    }
+
+    if (uploads.some((u) => u.uploading)) return;
+
+    setLoading(true);
+    setErrors({});
+
+    let res: Response;
+    try {
+      res = await fetch("/api/register", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName:      data.fullName,
+          phone:         data.phone,
+          fieldOfStudy:  data.fieldOfStudy === "Other" ? data.fieldOfStudyOther : data.fieldOfStudy,
+          battingStyle:  data.battingStyle,
+          bowlingStyle:  data.bowlingStyle,
+          referenceName: data.referenceName,
+          sabhaLike:     data.sabhaLike === "Other" ? data.sabhaLikeOther : data.sabhaLike,
+          otherTopics:   data.otherTopics || undefined,
+          imageUrls:     data.imageUrls,
+        }),
+      });
+    } catch {
+      setLoading(false);
+      setErrors({ _server: "Network error — check your connection and try again." });
+      return;
+    }
+
+    setLoading(false);
+
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({ error: "Unknown server error." }));
+      setErrors({ _server: payload.error ?? "Registration failed. Please try again." });
+      return;
+    }
+
+    setSuccess(true);
+  };
+
+  const handleBack = () => { setStep((s) => s - 1); setErrors({}); };
+
+  /* ── Early exit ───────────────────────────────────────────────────────── */
+
+  if (success) return <SuccessScreen phone={data.phone} uploads={uploads} />;
+
+  const isLastStep   = step === 4;
+  const anyUploading = uploads.some((u) => u.uploading);
+  const ctaLabel     = loading          ? "SUBMITTING…"
+                     : isLastStep && anyUploading ? "UPLOADING…"
+                     : isLastStep       ? "SUBMIT REGISTRATION →"
+                     : "CONTINUE →";
+
+  const stepProps = { data, errors, onChange: handleChange };
+
+  /* ── Render ───────────────────────────────────────────────────────────── */
+
+  return (
+    <div className="flex min-h-screen flex-col bg-apl-ink text-white">
+
+      {/* Top nav */}
+      <header className="border-b border-white/[0.06] px-6 py-4 md:px-12">
+        <div className="mx-auto flex max-w-[680px] items-center justify-between">
+          <Link href="/" className="font-mono text-[10px] tracking-[2.5px] text-white/40 transition hover:text-white">
+            ← HOME
+          </Link>
+          <span className="font-mono text-[10px] tracking-[2.5px] text-white/20">APL · S3 · REGISTER</span>
+        </div>
+      </header>
+
+      {/* Stepper */}
+      <div className="border-b border-white/[0.06]">
+        <div className="mx-auto max-w-[680px]">
+          <StepperBar current={step} />
+        </div>
+      </div>
+
+      {/* Step content */}
+      <div className="flex-1 overflow-auto scrollbar-none">
+        <div className="mx-auto max-w-[680px] px-6 pb-36 pt-10 md:px-12 md:pt-12">
+          <div key={step} className="animate-step-in">
+            {step === 1 && <Step1Personal {...stepProps} />}
+            {step === 2 && <Step2Cricket  {...stepProps} />}
+            {step === 3 && <Step3Sabha    {...stepProps} />}
+            {step === 4 && (
+              <Step4Photos
+                {...stepProps}
+                uploads={uploads}
+                uploadErr={uploadErr}
+                onAddImages={handleAddImages}
+                onRemoveImage={handleRemoveImage}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Fixed bottom nav */}
+      <div
+        className="fixed bottom-0 left-0 right-0 border-t border-white/[0.05] px-6 pb-8 pt-5 md:px-12"
+        style={{ background: "linear-gradient(to top, var(--apl-ink) 65%, rgba(10,10,10,0.94))" }}
+      >
+        <div className="mx-auto flex max-w-[680px] items-center gap-3">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="shrink-0 border border-white/[0.12] px-6 py-[15px] font-mono text-[10px] tracking-[1.5px] text-white/55 transition hover:border-white/30 hover:text-white"
+            >
+              ← BACK
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className="shrink-0 border border-white/[0.12] px-6 py-[15px] font-mono text-[10px] tracking-[1.5px] text-white/55 transition hover:border-white/30 hover:text-white"
+            >
+              ← HOME
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={loading || (isLastStep && anyUploading)}
+            className="shimmer relative flex-1 overflow-hidden bg-apl-yellow py-[15px] font-anton text-[17px] tracking-[2px] text-apl-ink transition-transform hover:-translate-y-[1px] active:scale-[0.99] disabled:opacity-55 md:text-[19px]"
+          >
+            {ctaLabel}
+          </button>
+        </div>
+
+        <p className="mt-3 text-center font-mono text-[8px] tracking-[2px] text-white/20">
+          {step} / {STEPS.length} COMPLETED
+        </p>
+      </div>
+
+    </div>
+  );
+}

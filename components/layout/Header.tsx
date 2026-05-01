@@ -4,8 +4,17 @@ import MobileMenu from "@/components/ui/MobileMenu";
 
 export default function Header() {
   return (
-    <header className="sticky top-[25px] z-[29] border-b border-white/[0.07] bg-apl-ink/80 backdrop-blur-[14px]">
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3 md:px-10 md:py-[14px] lg:px-16">
+    <header className="sticky top-[25px] z-[29] border-b border-white/[0.07]">
+      {/*
+        Glass layer lives in a child element — NOT on <header> itself.
+        backdrop-filter / filter / transform on a parent turns it into the
+        containing block for position:fixed descendants, so the mobile-menu
+        overlay (fixed inset-0) would only cover the header bar instead of
+        the full viewport. Moving the blur here breaks that trap.
+      */}
+      <div className="absolute inset-0 bg-[rgba(10,10,10,0.82)] backdrop-blur-[14px]" />
+
+      <div className="relative mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3 md:px-10 md:py-[14px] lg:px-16">
 
         {/* ── Logo ─────────────────────────────────────────────────────── */}
         <Link href="/" className="flex items-center gap-3 group">
