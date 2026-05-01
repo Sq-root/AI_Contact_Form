@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { getSupabase, uploadImage } from "@/lib/supabase";
+import { uploadImage } from "@/lib/supabase"; // getSupabase removed — form POSTs to /api/register
 import {
   FIELD_OF_STUDY_OPTIONS,
   BATTING_STYLES,
@@ -625,26 +625,38 @@ export default function RegisterForm() {
     setLoading(true);
     setErrors({});
 
-    const { error } = await getSupabase()
-      .from("registrations")
-      .insert({
-        full_name:      data.fullName,
-        phone:          data.phone,
-        field_of_study: data.fieldOfStudy === "Other" ? data.fieldOfStudyOther : data.fieldOfStudy,
-        batting_style:  data.battingStyle,
-        bowling_style:  data.bowlingStyle,
-        reference_name: data.referenceName,
-        sabha_like:     data.sabhaLike === "Other" ? data.sabhaLikeOther : data.sabhaLike,
-        other_topics:   data.otherTopics || null,
-        image_urls:     data.imageUrls,
+    /* POST to /api/register — server validates + inserts with Service Role key */
+    let res: Response;
+    try {
+      res = await fetch("/api/register", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName:      data.fullName,
+          phone:         data.phone,
+          fieldOfStudy:  data.fieldOfStudy === "Other" ? data.fieldOfStudyOther : data.fieldOfStudy,
+          battingStyle:  data.battingStyle,
+          bowlingStyle:  data.bowlingStyle,
+          referenceName: data.referenceName,
+          sabhaLike:     data.sabhaLike === "Other" ? data.sabhaLikeOther : data.sabhaLike,
+          otherTopics:   data.otherTopics || undefined,
+          imageUrls:     data.imageUrls,
+        }),
       });
+    } catch {
+      setLoading(false);
+      setErrors({ _server: "Network error — check your connection and try again." });
+      return;
+    }
 
     setLoading(false);
 
-    if (error) {
-      setErrors({ _server: error.message });
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({ error: "Unknown server error." }));
+      setErrors({ _server: payload.error ?? "Registration failed. Please try again." });
       return;
     }
+
     setSuccess(true);
   };
 
