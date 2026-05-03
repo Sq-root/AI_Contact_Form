@@ -1,111 +1,166 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { DatabaseError } from "pg";
+import { getDb } from "@/lib/db";
 
-/* ─── Server-side Supabase ────────────────────────────────────────────────────
-   Uses the Service Role key when set — bypasses RLS entirely.
-   Falls back to the Anon key during local dev if the service key isn't set yet.
-   IMPORTANT: SUPABASE_SERVICE_ROLE_KEY must NOT be prefixed with NEXT_PUBLIC_.
-────────────────────────────────────────────────────────────────────────────── */
-function serverSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false } },
-  );
-}
-
-/* ─── Payload type ────────────────────────────────────────────────────────── */
+const SOURCE_SYSTEM = "AI_CONTACT_FORM";
 
 interface RegisterPayload {
-  /* Step 1 */
-  fullName:      string;
-  phone:         string;
-  fieldOfStudy:  string;   // "Other" already resolved by client
-
-  /* Step 2 */
-  battingStyle:  string;
-  bowlingStyle:  string;
+  fullName: string;
+  phone: string;
+  fieldOfStudy: string;
+  battingStyle: string;
+  bowlingStyle: string;
   referenceName: string;
-  playingRole:   string;
-
-  /* Step 3 */
-  sabhaLike:     string;   // comma-separated selections, joined on client
-  otherTopics?:  string;
-
-  /* Step 4 */
-  imageUrls?:    string[];
+  playingRole: string;
+  sabhaLike: string;
+  otherTopics?: string;
+  imageUrls?: string[];
 }
 
-/* ─── Server-side validation ──────────────────────────────────────────────── */
+function normalizePhone(value: string) {
+  return value.replace(/[\s\-()+]/g, "");
+}
 
-function serverValidate(b: RegisterPayload): string | null {
-  if (!b.fullName?.trim())      return "Full name is required.";
-  const phone = (b.phone ?? "").replace(/[\s\-()+]/g, "");
-  if (!/^(91|0)?[6-9]\d{9}$/.test(phone))
-                                return "Enter a valid 10-digit Indian mobile number.";
-  if (!b.fieldOfStudy?.trim())  return "Field of study is required.";
-  if (!b.battingStyle)          return "Batting style is required.";
-  if (!b.bowlingStyle)          return "Bowling style is required.";
-  if (!b.referenceName?.trim()) return "Reference name is required.";
-  if (!b.playingRole)           return "Playing role is required.";
-  if (!b.sabhaLike)             return "Sabha preference is required.";
+function serverValidate(body: RegisterPayload): string | null {
+  if (!body.fullName?.trim()) {
+    return "Full name is required.";
+  }
+
+  const phone = normalizePhone(body.phone ?? "");
+  if (!/^(91|0)?[6-9]\d{9}$/.test(phone)) {
+    return "Enter a valid 10-digit Indian mobile number.";
+  }
+
+  if (!body.fieldOfStudy?.trim()) {
+    return "Field of study is required.";
+  }
+  if (!body.battingStyle) {
+    return "Batting style is required.";
+  }
+  if (!body.bowlingStyle) {
+    return "Bowling style is required.";
+  }
+  if (!body.referenceName?.trim()) {
+    return "Reference name is required.";
+  }
+  if (!body.playingRole) {
+    return "Playing role is required.";
+  }
+  if (!body.sabhaLike) {
+    return "Sabha preference is required.";
+  }
+
   return null;
 }
 
-/* ─── POST /api/register ──────────────────────────────────────────────────── */
-
 export async function POST(req: NextRequest) {
-  /* ── 1. Parse ─────────────────────────────────────────────────────────── */
   let body: RegisterPayload;
+
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  /* ── 2. Validate ──────────────────────────────────────────────────────── */
   const validationError = serverValidate(body);
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 422 });
   }
 
-  /* ── 3. Insert into Supabase ──────────────────────────────────────────── */
-  const { data, error } = await serverSupabase()
-    .from("registrations")
-    .insert({
-      full_name:        body.fullName.trim(),
-      phone:            body.phone.trim(),
-      field_of_study:   body.fieldOfStudy.trim(),
-      batting_style:    body.battingStyle,
-      bowling_style:    body.bowlingStyle,
-      reference_name:   body.referenceName.trim(),
-      playing_role:     body.playingRole,
-      sabha_like:       body.sabhaLike,
-      other_topics:     body.otherTopics?.trim()      || null,
-      image_urls:       body.imageUrls ?? [],
-    })
-    .select("id")
-    .single();
+  const normalizedPhone = normalizePhone(body.phone);
+  const db = getDb();
+  const client = await db.connect();
 
-  /* ── 4. Handle Supabase errors ────────────────────────────────────────── */
-  if (error) {
-    console.error("[POST /api/register] Supabase error:", {
-      code:    error.code,
-      message: error.message,
-      details: error.details,
-      hint:    error.hint,
-    });
+  try {
+    await client.query("begin");
+
+    const insertRegistration = await client.query<{
+      id: string;
+    }>(
+      `insert into external_player_registrations (
+         source_system,
+         full_name,
+         phone,
+         field_of_study,
+         batting_style,
+         bowling_style,
+         reference_name,
+         playing_role,
+         sabha_like,
+         other_topics,
+         image_urls
+       ) values (
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+       )
+       returning id`,
+      [
+        SOURCE_SYSTEM,
+        body.fullName.trim(),
+        normalizedPhone,
+        body.fieldOfStudy.trim(),
+        body.battingStyle,
+        body.bowlingStyle,
+        body.referenceName.trim(),
+        body.playingRole,
+        body.sabhaLike,
+        body.otherTopics?.trim() || null,
+        body.imageUrls ?? []
+      ]
+    );
+
+    const externalId = insertRegistration.rows[0]?.id;
+
+    await client.query(
+      `insert into external_registration_status (
+         external_registration_id,
+         payment_claimed,
+         payment_reference_number,
+         payment_claimed_at,
+         payment_done,
+         payment_marked_at,
+         admin_notes
+       ) values ($1, false, null, null, false, null, null)`,
+      [externalId]
+    );
+
+    await client.query(
+      `insert into external_registration_mappings (
+         source_system,
+         external_table,
+         external_record_id,
+         internal_registration_id,
+         sync_status,
+         sync_error
+       ) values ($1, 'external_player_registrations', $2, null, 'EXTERNAL_ONLY', null)`,
+      [SOURCE_SYSTEM, externalId]
+    );
+
+    await client.query("commit");
+
+    return NextResponse.json({ success: true, id: externalId }, { status: 201 });
+  } catch (error) {
+    await client.query("rollback");
+
+    const dbError = error as DatabaseError;
+    if (dbError.code === "23505") {
+      return NextResponse.json(
+        { error: "This phone number is already registered in the external player system." },
+        { status: 409 }
+      );
+    }
+
+    console.error("[POST /api/register] PostgreSQL error:", error);
+
     return NextResponse.json(
       {
-        error: process.env.NODE_ENV === "development"
-          ? `Supabase: ${error.message}${error.hint ? ` (hint: ${error.hint})` : ""}`
-          : "Registration failed. Please try again.",
+        error:
+          process.env.NODE_ENV === "development"
+            ? `PostgreSQL: ${dbError.message || "Unknown database error"}`
+            : "Registration failed. Please try again."
       },
-      { status: 500 },
+      { status: 500 }
     );
+  } finally {
+    client.release();
   }
-
-  /* ── 5. Return success ────────────────────────────────────────────────── */
-  return NextResponse.json({ success: true, id: data.id }, { status: 201 });
 }
