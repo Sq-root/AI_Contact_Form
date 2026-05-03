@@ -70,14 +70,16 @@ export async function POST(req: NextRequest) {
   const normalizedPhone = normalizePhone(body.phone);
   const db = getDb();
   const client = await db.connect();
+  const externalId = crypto.randomUUID();
+  const statusId = crypto.randomUUID();
+  const mappingId = crypto.randomUUID();
 
   try {
     await client.query("begin");
 
-    const insertRegistration = await client.query<{
-      id: string;
-    }>(
+    await client.query(
       `insert into external_player_registrations (
+         id,
          source_system,
          full_name,
          phone,
@@ -90,10 +92,10 @@ export async function POST(req: NextRequest) {
          other_topics,
          image_urls
        ) values (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
-       )
-       returning id`,
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
+       )`,
       [
+        externalId,
         SOURCE_SYSTEM,
         body.fullName.trim(),
         normalizedPhone,
@@ -108,10 +110,9 @@ export async function POST(req: NextRequest) {
       ]
     );
 
-    const externalId = insertRegistration.rows[0]?.id;
-
     await client.query(
       `insert into external_registration_status (
+         id,
          external_registration_id,
          payment_claimed,
          payment_reference_number,
@@ -119,20 +120,21 @@ export async function POST(req: NextRequest) {
          payment_done,
          payment_marked_at,
          admin_notes
-       ) values ($1, false, null, null, false, null, null)`,
-      [externalId]
+       ) values ($1, $2, false, null, null, false, null, null)`,
+      [statusId, externalId]
     );
 
     await client.query(
       `insert into external_registration_mappings (
+         id,
          source_system,
          external_table,
          external_record_id,
          internal_registration_id,
          sync_status,
          sync_error
-       ) values ($1, 'external_player_registrations', $2, null, 'EXTERNAL_ONLY', null)`,
-      [SOURCE_SYSTEM, externalId]
+       ) values ($1, $2, 'external_player_registrations', $3, null, 'EXTERNAL_ONLY', null)`,
+      [mappingId, SOURCE_SYSTEM, externalId]
     );
 
     await client.query("commit");
