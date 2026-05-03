@@ -2,6 +2,16 @@
 
 This repo now writes registrations into the shared PostgreSQL database instead of Supabase.
 
+## Deployment Shape
+
+1. The external UI stays on Vercel as a Next.js app.
+2. The external UI submits to its own `POST /api/register` route.
+3. That route writes directly into the shared Render PostgreSQL database.
+4. The Spring Boot admin panel reads the same shared tables from Render PostgreSQL.
+
+This means the external UI does **not** need to call the Spring Boot Render API for registration in Phase A.
+It only needs the shared PostgreSQL connection details.
+
 ## Tables
 
 1. `external_player_registrations`
@@ -77,6 +87,44 @@ Then expose a normalized admin DTO/view so the UI can show:
 - payment status
 - payment reference number
 - mapping status
+
+## Render Production Setup
+
+### 1. Run the SQL on Render PostgreSQL
+
+Run the SQL from:
+
+- `database/render-postgres-setup.sql`
+
+That creates:
+
+- `external_player_registrations`
+- `external_registration_status`
+- `external_registration_mappings`
+
+### 2. Set Vercel environment variables for this external UI
+
+Use values like:
+
+```bash
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DBNAME?sslmode=require
+PGSSLMODE=require
+DATABASE_POOL_MAX=5
+DATABASE_CONNECTION_TIMEOUT_MS=10000
+DATABASE_IDLE_TIMEOUT_MS=30000
+NEXT_PUBLIC_SITE_URL=https://your-vercel-project.vercel.app
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=...
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=...
+OPENROUTER_API_KEY=...
+```
+
+### 3. Keep Spring Boot pointed to the same database
+
+The Spring Boot backend should use the same Render PostgreSQL instance so the admin endpoints can read:
+
+- `external_player_registrations`
+- `external_registration_status`
+- `external_registration_mappings`
 
 ## Next Suggested Step
 
