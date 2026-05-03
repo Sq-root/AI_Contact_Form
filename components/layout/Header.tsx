@@ -17,7 +17,7 @@ export default function Header() {
       <div className="relative mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3 md:px-10 md:py-[14px] lg:px-16">
 
         {/* ── Logo ─────────────────────────────────────────────────────── */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/admin" className="flex items-center gap-3 group">
           <div
             className="grid animate-apl-spin place-items-center rounded-full bg-apl-yellow font-anton text-apl-ink shrink-0
                        h-8 w-8 text-[13px]

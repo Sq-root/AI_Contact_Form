@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Anton, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { APL_SEASON } from "@/lib/constants";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,13 +23,16 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600"],
 });
 
+const seasonNum = parseInt(APL_SEASON.number, 10);
+const venueName = APL_SEASON.venue.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
 export const metadata: Metadata = {
   title: {
-    default: "APL Season 3 — Akshar Premier League",
-    template: "%s | APL Season 3",
+    default: `APL Season ${seasonNum} — Akshar Premier League`,
+    template: `%s | APL Season ${seasonNum}`,
   },
   description:
-    "Where cricket meets character. Register for APL Season 3 — Brotherhood, Atmiyata, Discipline, Surrender, Prayer & Growth. Opening 14·06·2026 at Akshar Arena.",
+    `Where cricket meets character. Register for APL Season ${seasonNum} — Brotherhood, Atmiyata, Discipline, Surrender, Prayer & Growth. Opening ${APL_SEASON.opening} at ${venueName}.`,
   openGraph: {
     type: "website",
     locale: "en_IN",

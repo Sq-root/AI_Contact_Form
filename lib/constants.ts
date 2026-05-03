@@ -117,8 +117,8 @@ export const SABHA_LIKES = [
 /* ─── Ticker / Marquee strings ───────────────────────────────────────────── */
 
 export const TICKER_TEXT =
-  "★ APL S3 ★ NOW REGISTERING ★ 12 TEAMS · 64 PLAYERS ★ OPENING 14·06·2026 ★ " +
-  "APL S3 ★ NOW REGISTERING ★ 12 TEAMS · 64 PLAYERS ★ OPENING 14·06·2026 ★ ";
+  "★ APL S3 ★ NOW REGISTERING ★ 12 TEAMS · 64 PLAYERS ★ OPENING 06·06·2026 ★ " +
+  "APL S3 ★ NOW REGISTERING ★ 12 TEAMS · 64 PLAYERS ★ OPENING 06·06·2026 ★ ";
 
 export const NAV_LINKS = [
   { label: "About", href: "/#about" },
