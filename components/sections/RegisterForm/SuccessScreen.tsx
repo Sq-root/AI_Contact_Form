@@ -18,7 +18,7 @@ type PaymentClaimState = {
 };
 
 const paymentConfig = {
-  upiId: process.env.NEXT_PUBLIC_UPI_ID || "rnitin1964@okhdfcbank",
+  upiId: process.env.NEXT_PUBLIC_UPI_ID || "sondagarchirag01-2@okicici",
   payeeName: process.env.NEXT_PUBLIC_UPI_PAYEE_NAME || "Raju Shah",
   amount: process.env.NEXT_PUBLIC_UPI_AMOUNT || "500",
   notePrefix: process.env.NEXT_PUBLIC_UPI_NOTE_PREFIX || "APL Reg"
