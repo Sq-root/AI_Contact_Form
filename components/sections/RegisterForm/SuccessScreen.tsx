@@ -19,8 +19,8 @@ type PaymentClaimState = {
 
 const paymentConfig = {
   upiId: process.env.NEXT_PUBLIC_UPI_ID || "sondagarchirag01-2@okicici",
-  payeeName: process.env.NEXT_PUBLIC_UPI_PAYEE_NAME || "Raju Shah",
-  amount: process.env.NEXT_PUBLIC_UPI_AMOUNT || "500",
+  payeeName: process.env.NEXT_PUBLIC_UPI_PAYEE_NAME || "CHIRAG RATILAL SONDAGAR",
+  amount: process.env.NEXT_PUBLIC_UPI_AMOUNT || "350",
   notePrefix: process.env.NEXT_PUBLIC_UPI_NOTE_PREFIX || "APL Reg"
 };
 
@@ -291,7 +291,7 @@ export function SuccessScreen({
         </div>
       </div>
 
-      <section className="mt-10 grid w-full max-w-[440px] gap-5 border border-white/[0.08] bg-white/[0.04] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+      <section className="mt-10 grid w-full max-w-[460px] gap-5 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.25)] backdrop-blur-xl">
         <div className="grid gap-2">
           <span className="font-mono text-[10px] tracking-[2.5px] text-apl-yellow">PAYMENT NEXT STEP</span>
           <h2 className="font-anton text-[34px] uppercase leading-[0.92] text-white md:text-[42px]">
@@ -317,18 +317,21 @@ export function SuccessScreen({
           </small>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="grid gap-1 border border-white/[0.08] bg-black/20 p-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-2 rounded-[20px] border border-white/[0.08] bg-black/25 p-4">
             <span className="font-mono text-[9px] tracking-[2px] text-white/35">UPI ID</span>
-            <strong className="text-sm text-white">{paymentConfig.upiId}</strong>
+            <strong className="break-all text-[15px] leading-6 text-white">{paymentConfig.upiId}</strong>
           </div>
-          <div className="grid gap-1 border border-white/[0.08] bg-black/20 p-4">
+          <div className="grid gap-2 rounded-[20px] border border-white/[0.08] bg-black/25 p-4">
             <span className="font-mono text-[9px] tracking-[2px] text-white/35">PAYEE NAME</span>
-            <strong className="text-sm text-white">{paymentConfig.payeeName}</strong>
+            <strong className="text-[15px] leading-6 text-white">{paymentConfig.payeeName}</strong>
           </div>
-          <div className="grid gap-1 border border-white/[0.08] bg-black/20 p-4">
-            <span className="font-mono text-[9px] tracking-[2px] text-white/35">PAYMENT NOTE</span>
-            <strong className="text-sm text-white">{paymentNote}</strong>
+          <div className="grid gap-2 rounded-[20px] border border-apl-yellow/15 bg-[linear-gradient(180deg,rgba(255,195,31,0.06),rgba(255,255,255,0.02))] p-4 sm:col-span-2">
+            <span className="font-mono text-[9px] tracking-[2px] text-apl-yellow">REGISTERED PLAYER NOTE</span>
+            <strong className="text-[16px] leading-7 text-white">{paymentNote}</strong>
+            <small className="text-[12px] leading-6 text-white/50">
+              This note includes the registered player name so the payment is easier to identify.
+            </small>
           </div>
         </div>
 
@@ -336,31 +339,31 @@ export function SuccessScreen({
           <button
             type="button"
             onClick={() => void copyPaymentText(paymentConfig.upiId, "UPI ID copied.")}
-            className="border border-white/[0.14] px-4 py-4 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
+            className="rounded-[20px] border border-white/[0.14] px-4 py-4 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
           >
             COPY UPI ID
           </button>
           <button
             type="button"
             onClick={() => void copyPaymentText(paymentNote, "Payment note copied.")}
-            className="border border-white/[0.14] px-4 py-4 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
+            className="rounded-[20px] border border-white/[0.14] px-4 py-4 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
           >
             COPY NOTE
           </button>
           <a
             href={upiOpenAppUri}
             onClick={markPaymentAppOpened}
-            className="bg-apl-red px-4 py-4 text-center font-anton text-[14px] tracking-[2px] text-white transition hover:bg-red-600"
+            className="rounded-[20px] bg-apl-red px-4 py-4 text-center font-anton text-[14px] tracking-[2px] text-white transition hover:bg-red-600"
           >
             OPEN UPI APP
           </a>
         </div>
 
-        <div className="grid gap-3 border border-white/[0.08] bg-black/20 p-4">
+        <div className="grid gap-3 rounded-[24px] border border-white/[0.08] bg-black/20 p-5">
           <span className="font-mono text-[10px] tracking-[2.5px] text-apl-yellow">
             {paymentState.paymentClaimed ? "PAYMENT CLAIMED" : "AFTER PAYMENT"}
           </span>
-          <strong className="font-anton text-[26px] uppercase leading-none text-white">
+          <strong className="font-anton text-[22px] uppercase leading-[1.02] text-white sm:text-[26px]">
             {paymentState.paymentClaimed
               ? "Your payment confirmation is saved"
               : paymentReturnPromptVisible
@@ -384,14 +387,14 @@ export function SuccessScreen({
                   maxLength={80}
                   onChange={(event) => setPaymentReferenceNumber(event.target.value)}
                   placeholder="Example: 123456789012"
-                  className="border border-white/[0.12] bg-black/35 px-4 py-3 text-sm text-white outline-none transition focus:border-apl-yellow"
+                  className="rounded-[18px] border border-white/[0.12] bg-black/35 px-4 py-3 text-sm text-white outline-none transition focus:border-apl-yellow"
                 />
               </label>
               <button
                 type="button"
                 onClick={() => void claimPaymentCompleted()}
                 disabled={paymentClaimLoading}
-                className="bg-apl-yellow px-5 py-4 font-anton text-[14px] tracking-[2px] text-apl-ink transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-[20px] bg-apl-yellow px-5 py-4 font-anton text-[14px] tracking-[2px] text-apl-ink transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {paymentClaimLoading ? "SAVING..." : "I HAVE COMPLETED PAYMENT"}
               </button>
