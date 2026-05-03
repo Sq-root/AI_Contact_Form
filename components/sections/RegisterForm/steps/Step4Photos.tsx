@@ -1,11 +1,10 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { StepHeader } from "../StepHeader";
-import { downloadImage } from "../utils";
 import type { Step4Props, UploadItem } from "../types";
 
-/* ─── ImageDropZone ───────────────────────────────────────────────────────── */
+/* ─── DropZone (only renders when no image is uploaded yet) ───────────────── */
 
-function ImageDropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
+function DropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
   const [over, setOver] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
 
@@ -22,7 +21,7 @@ function ImageDropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
       }}
       onClick={() => ref.current?.click()}
       onKeyDown={(e) => e.key === "Enter" && ref.current?.click()}
-      className={`cursor-pointer border-2 border-dashed py-16 text-center transition-all duration-200 ${
+      className={`cursor-pointer border-2 border-dashed py-20 text-center transition-all duration-200 ${
         over
           ? "border-apl-yellow bg-apl-yellow/5"
           : "border-white/[0.10] hover:border-white/22 hover:bg-white/[0.02]"
@@ -32,68 +31,87 @@ function ImageDropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
         ref={ref}
         type="file"
         accept="image/*"
-        multiple
         className="sr-only"
         onChange={(e) => { if (e.target.files) onAdd(e.target.files); e.target.value = ""; }}
       />
-      <span className="block font-anton text-[56px] leading-none text-white/12">↑</span>
+      <span className="block font-anton text-[64px] leading-none text-white/12">↑</span>
       <p className="mt-4 font-mono text-[11px] tracking-[2.5px] text-white/45">
         DRAG &amp; DROP OR CLICK TO BROWSE
       </p>
       <p className="mt-1.5 font-mono text-[9px] tracking-[1.5px] text-white/25">
-        JPG · PNG · WEBP · MAX 5 MB EACH
+        ONE PHOTO · JPG · PNG · WEBP · MAX 5 MB
       </p>
     </div>
   );
 }
 
-/* ─── UploadCard ──────────────────────────────────────────────────────────── */
+/* ─── Preview (single hero card) ──────────────────────────────────────────── */
 
-function UploadCard({ item, onRemove }: { item: UploadItem; onRemove: () => void }) {
+function Preview({
+  item,
+  onReplace,
+  onRemove,
+}: {
+  item:      UploadItem;
+  onReplace: (files: FileList) => void;
+  onRemove:  () => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+
   return (
-    <div className="group relative overflow-hidden border border-white/[0.07]">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={item.localUrl} alt={item.file.name} className="aspect-square w-full object-cover" />
+    <div className="relative">
+      <div className="relative overflow-hidden border border-white/[0.09] bg-[#0d0d0d]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={item.localUrl} alt={item.file.name} className="aspect-square w-full object-cover" />
 
-      {item.uploading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-apl-ink/82">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-apl-yellow" />
-          <span className="font-mono text-[7px] tracking-[1.5px] text-apl-yellow">UPLOADING</span>
-        </div>
-      )}
+        {item.uploading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-apl-ink/82">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-apl-yellow" />
+            <span className="font-mono text-[10px] tracking-[2px] text-apl-yellow">UPLOADING…</span>
+          </div>
+        )}
 
-      {item.error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-apl-red/20 p-2">
-          <span className="text-center font-mono text-[7px] leading-snug text-white">{item.error}</span>
-        </div>
-      )}
+        {item.error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-apl-red/25 p-4">
+            <span className="text-center font-mono text-[10px] leading-snug text-white">
+              ✕ {item.error}
+            </span>
+          </div>
+        )}
 
-      {item.storageUrl && !item.uploading && (
-        <span className="absolute left-2 top-2 bg-apl-yellow px-1.5 py-[2px] font-mono text-[7px] tracking-[1px] text-apl-ink">
-          ✓
-        </span>
-      )}
+        {item.storageUrl && !item.uploading && (
+          <span className="absolute left-3 top-3 bg-apl-yellow px-2 py-[3px] font-mono text-[8px] tracking-[1.5px] text-apl-ink">
+            ✓ UPLOADED
+          </span>
+        )}
+      </div>
 
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-apl-ink/90 px-2 py-1.5 opacity-0 transition group-hover:opacity-100">
-        <span className="min-w-0 truncate font-mono text-[7px] text-white/40">{item.file.name}</span>
-        <div className="ml-1 flex shrink-0 gap-1">
-          {item.storageUrl && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); downloadImage(item.storageUrl!, item.file.name); }}
-              className="border border-apl-yellow/40 px-1.5 py-0.5 font-mono text-[7px] text-apl-yellow hover:bg-apl-yellow/10"
-            >
-              ↓
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            className="border border-white/20 px-1.5 py-0.5 font-mono text-[7px] text-white/50 hover:border-apl-red/50 hover:text-apl-red"
-          >
-            ✕
-          </button>
-        </div>
+      <p className="mt-2 truncate font-mono text-[9px] tracking-[1px] text-white/35">
+        {item.file.name}
+      </p>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <input
+          ref={ref}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={(e) => { if (e.target.files) onReplace(e.target.files); e.target.value = ""; }}
+        />
+        <button
+          type="button"
+          onClick={() => ref.current?.click()}
+          className="border border-white/[0.12] py-3 font-mono text-[10px] tracking-[2px] text-white/65 transition hover:border-apl-yellow/60 hover:text-apl-yellow"
+        >
+          ↻ REPLACE PHOTO
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="border border-white/[0.08] py-3 font-mono text-[10px] tracking-[2px] text-white/45 transition hover:border-apl-red/60 hover:text-apl-red"
+        >
+          ✕ REMOVE
+        </button>
       </div>
     </div>
   );
@@ -108,45 +126,34 @@ export function Step4Photos({
   onAddImages,
   onRemoveImage,
 }: Step4Props) {
+  const current = uploads[0];
+
   return (
     <>
       <StepHeader
         eyebrow="// STEP 04 OF 04"
-        title={<>Upload <span className="text-apl-yellow">photos.</span></>}
-        sub="Optional — images are stored securely and will be analysed by an AI model in a future update."
+        title={<>Profile <span className="text-apl-yellow">image.</span></>}
+        sub="Upload one clear profile photo of yourself."
       />
 
-      <ImageDropZone onAdd={onAddImages} />
+      {current ? (
+        <Preview
+          item={current}
+          onReplace={onAddImages}
+          onRemove={() => onRemoveImage(current.id)}
+        />
+      ) : (
+        <DropZone onAdd={onAddImages} />
+      )}
+
+      {errors.imageUrls && (
+        <p className="mt-3 flex items-center gap-1.5 font-mono text-[9px] tracking-[0.5px] text-apl-red">
+          <span>✕</span> {errors.imageUrls}
+        </p>
+      )}
 
       {uploadErr && (
         <p className="mt-3 font-mono text-[9px] text-apl-red">{uploadErr}</p>
-      )}
-
-      {uploads.length > 0 && (
-        <>
-          <div className="mt-4 grid grid-cols-3 gap-2 md:grid-cols-4">
-            {uploads.map((item) => (
-              <UploadCard
-                key={item.id}
-                item={item}
-                onRemove={() => onRemoveImage(item.id)}
-              />
-            ))}
-          </div>
-          {uploads.some((u) => u.storageUrl) && (
-            <button
-              type="button"
-              onClick={() =>
-                uploads
-                  .filter((u) => u.storageUrl)
-                  .forEach((u) => downloadImage(u.storageUrl!, u.file.name))
-              }
-              className="mt-3 w-full border border-white/[0.09] py-3 font-mono text-[9px] tracking-[2px] text-white/40 transition hover:border-white/25 hover:text-white"
-            >
-              ↓ DOWNLOAD ALL UPLOADED IMAGES
-            </button>
-          )}
-        </>
       )}
 
       {errors._server && (

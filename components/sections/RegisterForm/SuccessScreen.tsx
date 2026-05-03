@@ -1,7 +1,19 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { APL_SEASON } from "@/lib/constants";
 import type { UploadItem } from "./types";
-import { downloadImage } from "./utils";
+
+/* ─── Avatar state machine ────────────────────────────────────────────────── */
+
+type AvatarState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready";  src: string }
+  | { status: "error";  message: string };
+
+/* ─── SuccessScreen ───────────────────────────────────────────────────────── */
 
 export function SuccessScreen({
   phone,
@@ -10,10 +22,52 @@ export function SuccessScreen({
   phone:   string;
   uploads: UploadItem[];
 }) {
-  const saved = uploads.filter((u) => u.storageUrl);
+  const sourcePhotoUrl = uploads.find((u) => u.storageUrl)?.storageUrl ?? null;
+
+  const [avatar, setAvatar] = useState<AvatarState>({ status: "idle" });
+  const triggered = useRef(false);
+
+  /* Auto-trigger avatar generation once on mount */
+  useEffect(() => {
+    // if (!sourcePhotoUrl || triggered.current) return;
+    // triggered.current = true;
+    // generate(sourcePhotoUrl);
+  }, [sourcePhotoUrl]);
+
+  async function generate(imageUrl: string) {
+    setAvatar({ status: "loading" });
+    try {
+      const res = await fetch("/api/avatar", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ imageUrl }),
+      });
+
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(error ?? "Avatar generation failed");
+      }
+      const { image } = await res.json();
+      setAvatar({ status: "ready", src: image });
+    } catch (err) {
+      setAvatar({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  function downloadAvatar() {
+    if (avatar.status !== "ready") return;
+    const a = document.createElement("a");
+    a.href = avatar.src;
+    a.download = `apl-s3-avatar-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-apl-page px-6 py-20 text-white">
+    <div className="flex min-h-screen flex-col items-center bg-apl-page px-6 py-16 text-white md:py-20">
+
+      {/* ── Hero confirmation ─────────────────────────────────────────────── */}
       <div
         className="mb-10 grid h-28 w-28 animate-apl-pop place-items-center rounded-full bg-apl-yellow"
         style={{
@@ -58,44 +112,122 @@ export function SuccessScreen({
         </div>
       </div>
 
-      {saved.length > 0 && (
-        <div className="mt-8 w-full max-w-[440px]">
-          <p className="mb-3 font-mono text-[9px] tracking-[2px] text-white/30">
-            YOUR UPLOADED PHOTOS
-          </p>
-          <div className="grid grid-cols-4 gap-[3px]">
-            {saved.map((u) => (
-              <div key={u.id} className="group relative cursor-pointer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={u.localUrl} alt="" className="aspect-square w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => downloadImage(u.storageUrl!, u.file.name)}
-                  className="absolute inset-0 flex items-center justify-center bg-apl-ink/0 font-mono text-[11px] text-transparent transition group-hover:bg-apl-ink/70 group-hover:text-apl-yellow"
-                >
-                  ↓
-                </button>
-              </div>
-            ))}
-          </div>
-          {saved.length > 1 && (
-            <button
-              type="button"
-              onClick={() => saved.forEach((u) => downloadImage(u.storageUrl!, u.file.name))}
-              className="mt-2 w-full border border-white/[0.09] py-3 font-mono text-[9px] tracking-[2px] text-white/40 transition hover:border-white/25 hover:text-white"
-            >
-              ↓ DOWNLOAD ALL
-            </button>
-          )}
-        </div>
-      )}
+      {/* ── AI Avatar reveal ──────────────────────────────────────────────── */}
+      {/* sourcePhotoUrl && (
+        <AvatarSection
+          state={avatar}
+          onRetry={() => generate(sourcePhotoUrl)}
+          onDownload={downloadAvatar}
+        />
+      ) */}
 
       <Link
         href="/"
-        className="mt-10 border border-white/20 px-10 py-4 font-mono text-[11px] tracking-[2.5px] text-white transition hover:border-white/40"
+        className="mt-12 border border-white/20 px-10 py-4 font-mono text-[11px] tracking-[2.5px] text-white transition hover:border-white/40"
       >
         ← BACK TO HOME
       </Link>
+    </div>
+  );
+}
+
+/* ─── AvatarSection ───────────────────────────────────────────────────────── */
+
+function AvatarSection({
+  state,
+  onRetry,
+  onDownload,
+}: {
+  state:      AvatarState;
+  onRetry:    () => void;
+  onDownload: () => void;
+}) {
+  return (
+    <section className="mt-14 w-full max-w-[440px]">
+      <div className="mb-4 flex items-baseline justify-between">
+        <p className="font-mono text-[10px] tracking-[2.5px] text-apl-yellow">
+          // YOUR AI AVATAR
+        </p>
+        <p className="font-mono text-[8px] tracking-[1.5px] text-white/25">
+          POWERED BY GEMINI
+        </p>
+      </div>
+
+      <div
+        className="relative aspect-square overflow-hidden border border-apl-yellow/20 bg-[#0d0d0d]"
+        style={{ boxShadow: "0 30px 80px -30px rgba(255,195,31,0.18)" }}
+      >
+        {state.status === "loading" && <AvatarSkeleton />}
+        {state.status === "idle"    && <AvatarSkeleton />}
+
+        {state.status === "ready" && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={state.src}
+            alt="AI-generated avatar"
+            className="h-full w-full animate-apl-pop object-cover"
+          />
+        )}
+
+        {state.status === "error" && (
+          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+            <span className="font-anton text-[40px] leading-none text-apl-red/70">!</span>
+            <p className="font-mono text-[10px] leading-relaxed tracking-[1px] text-white/55">
+              {state.message}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {state.status === "ready" && (
+        <button
+          type="button"
+          onClick={onDownload}
+          className="shimmer relative mt-4 w-full overflow-hidden bg-apl-yellow py-[15px] font-anton text-[15px] tracking-[2px] text-apl-ink transition-transform hover:-translate-y-[1px] active:scale-[0.99]"
+        >
+          ↓ DOWNLOAD AVATAR
+        </button>
+      )}
+
+      {state.status === "error" && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-4 w-full border border-white/20 py-[15px] font-mono text-[11px] tracking-[2.5px] text-white transition hover:border-apl-yellow hover:text-apl-yellow"
+        >
+          ↻ TRY AGAIN
+        </button>
+      )}
+
+      {state.status === "loading" && (
+        <p className="mt-4 text-center font-mono text-[9px] tracking-[2px] text-white/35">
+          GENERATING · TYPICALLY 10–20 SECONDS
+        </p>
+      )}
+    </section>
+  );
+}
+
+/* ─── AvatarSkeleton ──────────────────────────────────────────────────────── */
+
+function AvatarSkeleton() {
+  return (
+    <div className="relative h-full w-full">
+      {/* base */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#101010] via-[#161616] to-[#0a0a0a]" />
+      {/* shimmer */}
+      <div
+        className="absolute inset-0 animate-skeleton"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(255,195,31,0.06) 50%, transparent 100%)",
+        }}
+      />
+      {/* center mark */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-white/10 border-t-apl-yellow" />
+        <span className="font-mono text-[9px] tracking-[3px] text-white/35">RENDERING</span>
+      </div>
     </div>
   );
 }

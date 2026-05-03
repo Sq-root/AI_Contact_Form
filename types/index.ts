@@ -24,15 +24,23 @@ export interface GalleryItem {
 }
 
 export interface FormData {
+  /* Step 1 — Personal */
   fullName:          string;
   phone:             string;
   fieldOfStudy:      string;
   fieldOfStudyOther: string;
+
+  /* Step 2 — Cricket */
   battingStyle:      string;
   bowlingStyle:      string;
   referenceName:     string;
-  sabhaLike:         string;
+  playingRole:       string;
+
+  /* Step 3 — Sabha */
+  sabhaLike:         string[];
   sabhaLikeOther:    string;
   otherTopics:       string;
+
+  /* Step 4 — AI Avatar */
   imageUrls:         string[];
 }

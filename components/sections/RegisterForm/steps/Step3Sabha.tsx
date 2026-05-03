@@ -16,15 +16,12 @@ export function Step3Sabha({ data, errors, onChange }: StepProps) {
       <TileSelect
         label="What do you like most in Sabha?"
         options={SABHA_LIKES}
+        multi
         value={data.sabhaLike}
         onChange={(v) => onChange("sabhaLike", v)}
         cols={1}
         required
         error={errors.sabhaLike}
-        withOther
-        otherValue={data.sabhaLikeOther}
-        onOtherChange={(v) => onChange("sabhaLikeOther", v)}
-        otherError={errors.sabhaLikeOther}
       />
 
       <Textarea

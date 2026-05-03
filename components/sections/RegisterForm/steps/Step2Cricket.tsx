@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/Input";
 import { TileSelect } from "@/components/ui/TileSelect";
-import { BATTING_STYLES, BOWLING_STYLES } from "@/lib/constants";
+import { BATTING_STYLES, BOWLING_STYLES, APL_ROLES } from "@/lib/constants";
 import { StepHeader } from "../StepHeader";
 import type { StepProps } from "../types";
 
@@ -11,6 +11,16 @@ export function Step2Cricket({ data, errors, onChange }: StepProps) {
         eyebrow="// STEP 02 OF 04"
         title={<>Cricket <span className="text-apl-yellow">profile.</span></>}
         sub="Tell us how you play the game and who referred you."
+      />
+
+      <TileSelect
+        label="Playing Role"
+        options={APL_ROLES}
+        value={data.playingRole}
+        onChange={(v) => onChange("playingRole", v)}
+        cols={2}
+        required
+        error={errors.playingRole}
       />
 
       <TileSelect

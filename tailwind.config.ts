@@ -59,6 +59,10 @@ const config: Config = {
           from: { transform: "scale(0.6)", opacity: "0" },
           to:   { transform: "scale(1)",   opacity: "1" },
         },
+        skeletonShimmer: {
+          "0%":   { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "ticker":     "ticker 22s linear infinite",
@@ -74,6 +78,7 @@ const config: Config = {
         "fade-up":    "fadeUp 0.9s 1s both",
         "step-in":    "stepIn 0.5s cubic-bezier(0.2,0.8,0.2,1)",
         "apl-pop":    "aplPop 0.6s cubic-bezier(0.2,1.4,0.4,1)",
+        "skeleton":   "skeletonShimmer 2s ease-in-out infinite",
       },
     },
   },

@@ -12,49 +12,42 @@ export function getSupabase() {
   return _client;
 }
 
-export async function uploadImage(file: File, path: string): Promise<string> {
-  const { data, error } = await getSupabase()
-    .storage
-    .from("apl-uploads")
-    .upload(path, file, { upsert: false, cacheControl: "3600" });
-
-  if (error) throw new Error(error.message);
-
-  const { data: { publicUrl } } = getSupabase()
-    .storage
-    .from("apl-uploads")
-    .getPublicUrl(data.path);
-
-  return publicUrl;
-}
-
 /*
-  ── Supabase setup ────────────────────────────────────────────────────────────
+  ── Supabase setup (database only — image hosting is on Cloudinary) ──────────
 
-  1. Create table:
+  STEP A — Create the registrations table (run once in SQL Editor):
 
-    create table registrations (
+    create table if not exists registrations (
       id             uuid        default gen_random_uuid() primary key,
+      -- Step 1: Personal
       full_name      text        not null,
-      phone          text        not null,
+      phone          text        not null unique,
       field_of_study text        not null,
+      -- Step 2: Cricket
       batting_style  text        not null,
       bowling_style  text        not null,
       reference_name text        not null,
+      playing_role   text        not null,
+      -- Step 3: Sabha
       sabha_like     text        not null,
       other_topics   text,
+      -- Step 4: AI Avatar (Cloudinary URLs)
       image_urls     text[]      default '{}',
       created_at     timestamptz default now()
     );
 
+    alter table registrations enable row level security;
+
     create policy "allow anon insert"
     on registrations for insert to anon with check (true);
 
-  2. Create Storage bucket named "apl-uploads":
-     - Set bucket to PUBLIC
-     - Add a policy allowing anon uploads:
+  STEP B — .env.local keys needed:
+    NEXT_PUBLIC_SUPABASE_URL=...
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+    SUPABASE_SERVICE_ROLE_KEY=...                  (server-only, no NEXT_PUBLIC_ prefix)
 
-    create policy "allow anon upload"
-    on storage.objects for insert to anon
-    with check (bucket_id = 'apl-uploads');
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=...
+    NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=...
+
+    GEMINI_API_KEY=...                             (server-only, no NEXT_PUBLIC_ prefix)
 */

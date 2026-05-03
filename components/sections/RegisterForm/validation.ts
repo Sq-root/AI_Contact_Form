@@ -17,15 +17,18 @@ export function validateStep(step: number, data: FormData): FieldErrors {
   }
 
   if (step === 2) {
-    if (!data.battingStyle)        e.battingStyle  = "Please select one";
-    if (!data.bowlingStyle)        e.bowlingStyle  = "Please select one";
+    if (!data.battingStyle)         e.battingStyle  = "Please select one";
+    if (!data.bowlingStyle)         e.bowlingStyle  = "Please select one";
     if (!data.referenceName.trim()) e.referenceName = "Reference name is required";
+    if (!data.playingRole)          e.playingRole   = "Please select your role";
   }
 
   if (step === 3) {
-    if (!data.sabhaLike) e.sabhaLike = "Please select one";
-    if (data.sabhaLike === "Other" && !data.sabhaLikeOther.trim())
-      e.sabhaLikeOther = "Please specify";
+    if (!data.sabhaLike.length) e.sabhaLike = "Please select at least one";
+  }
+
+  if (step === 4) {
+    if (!data.imageUrls.length) e.imageUrls = "Please upload at least one photo";
   }
 
   return e;

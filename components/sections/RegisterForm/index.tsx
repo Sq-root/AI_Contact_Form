@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { uploadImage } from "@/lib/supabase";
+import { uploadImage } from "@/lib/cloudinary";
 import type { FormData } from "@/types";
 
 import { type UploadItem, type FieldErrors, STEPS, INITIAL, MAX_SIZE } from "./types";
@@ -14,6 +14,8 @@ import { Step2Cricket } from "./steps/Step2Cricket";
 import { Step3Sabha } from "./steps/Step3Sabha";
 import { Step4Photos } from "./steps/Step4Photos";
 
+const LAST_STEP = STEPS.length; // 4
+
 export default function RegisterForm() {
   const [step,      setStep]      = useState(1);
   const [data,      setData]      = useState<FormData>(INITIAL);
@@ -23,44 +25,49 @@ export default function RegisterForm() {
   const [loading,   setLoading]   = useState(false);
   const [success,   setSuccess]   = useState(false);
 
-  /* ── Single field change handler (clears its own error) ───────────────── */
+  /* ── Field change (clears its own error) ─────────────────────────────── */
 
-  const handleChange = useCallback((key: keyof FormData, value: string) => {
-    setData((d) => ({ ...d, [key]: value }));
+  const handleChange = useCallback((key: keyof FormData, value: string | string[]) => {
+    setData((d) => ({ ...d, [key]: value } as FormData));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   }, []);
 
   /* ── Image upload / remove ────────────────────────────────────────────── */
 
   const handleAddImages = useCallback((files: FileList) => {
-    const valid = Array.from(files).filter((f) => {
-      if (f.size > MAX_SIZE) { setUploadErr(`"${f.name}" exceeds 5 MB.`); return false; }
-      return true;
-    });
-    if (!valid.length) return;
+    const file = files[0];
+    if (!file) return;
+    if (file.size > MAX_SIZE) {
+      setUploadErr(`"${file.name}" exceeds 5 MB.`);
+      return;
+    }
     setUploadErr(null);
 
-    const items: UploadItem[] = valid.map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    const item: UploadItem = {
+      id:         `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       file,
       localUrl:   URL.createObjectURL(file),
       storageUrl: null,
       uploading:  true,
       error:      null,
-    }));
+    };
 
-    setUploads((p) => [...p, ...items]);
+    /* Replace any prior upload — only one image is allowed */
+    setUploads((prev) => {
+      prev.forEach((u) => URL.revokeObjectURL(u.localUrl));
+      return [item];
+    });
+    setData((d) => ({ ...d, imageUrls: [] }));
 
-    items.forEach(async (item) => {
-      const path = `registrations/${Date.now()}-${item.id}/${item.file.name}`;
+    (async () => {
       try {
-        const url = await uploadImage(item.file, path);
+        const url = await uploadImage(item.file);
         setUploads((p) => p.map((u) => u.id === item.id ? { ...u, uploading: false, storageUrl: url } : u));
-        setData((d) => ({ ...d, imageUrls: [...d.imageUrls, url] }));
+        setData((d) => ({ ...d, imageUrls: [url] }));
       } catch (err) {
         setUploads((p) => p.map((u) => u.id === item.id ? { ...u, uploading: false, error: (err as Error).message } : u));
       }
-    });
+    })();
   }, []);
 
   const handleRemoveImage = useCallback((id: string) => {
@@ -78,7 +85,8 @@ export default function RegisterForm() {
   /* ── Navigation ───────────────────────────────────────────────────────── */
 
   const handleNext = async () => {
-    if (step < 4) {
+    /* Steps 1–4: validate then advance */
+    if (step < LAST_STEP) {
       const errs = validateStep(step, data);
       if (Object.keys(errs).length) { setErrors(errs); return; }
       setErrors({});
@@ -86,7 +94,11 @@ export default function RegisterForm() {
       return;
     }
 
+    /* Step 4: validate then submit */
     if (uploads.some((u) => u.uploading)) return;
+
+    const submitErrs = validateStep(4, data);
+    if (Object.keys(submitErrs).length) { setErrors(submitErrs); return; }
 
     setLoading(true);
     setErrors({});
@@ -103,7 +115,8 @@ export default function RegisterForm() {
           battingStyle:  data.battingStyle,
           bowlingStyle:  data.bowlingStyle,
           referenceName: data.referenceName,
-          sabhaLike:     data.sabhaLike === "Other" ? data.sabhaLikeOther : data.sabhaLike,
+          playingRole:   data.playingRole,
+          sabhaLike:     data.sabhaLike.join(", "),
           otherTopics:   data.otherTopics || undefined,
           imageUrls:     data.imageUrls,
         }),
@@ -131,11 +144,11 @@ export default function RegisterForm() {
 
   if (success) return <SuccessScreen phone={data.phone} uploads={uploads} />;
 
-  const isLastStep   = step === 4;
+  const isLastStep   = step === LAST_STEP;
   const anyUploading = uploads.some((u) => u.uploading);
-  const ctaLabel     = loading          ? "SUBMITTING…"
+  const ctaLabel     = loading                   ? "SUBMITTING…"
                      : isLastStep && anyUploading ? "UPLOADING…"
-                     : isLastStep       ? "SUBMIT REGISTRATION →"
+                     : isLastStep                 ? "SUBMIT REGISTRATION →"
                      : "CONTINUE →";
 
   const stepProps = { data, errors, onChange: handleChange };

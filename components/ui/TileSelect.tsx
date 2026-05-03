@@ -1,18 +1,29 @@
-interface TileSelectProps {
-  label:          string;
-  options:        readonly string[];
+interface TileBase {
+  label:     string;
+  options:   readonly string[];
+  cols?:     number;
+  required?: boolean;
+  error?:    string;
+  hint?:     string;
+}
+
+interface TileSelectSingle extends TileBase {
+  multi?:         false;
   value:          string;
   onChange:       (v: string) => void;
-  cols?:          number;
-  required?:      boolean;
-  error?:         string;
-  hint?:          string;
-  /* "Other" mode — renders a text input when value === "Other" */
   withOther?:     boolean;
   otherValue?:    string;
   onOtherChange?: (v: string) => void;
   otherError?:    string;
 }
+
+interface TileSelectMulti extends TileBase {
+  multi:    true;
+  value:    string[];
+  onChange: (v: string[]) => void;
+}
+
+type TileSelectProps = TileSelectSingle | TileSelectMulti;
 
 function Tile({
   label,
@@ -43,20 +54,23 @@ function Tile({
   );
 }
 
-export function TileSelect({
-  label,
-  options,
-  value,
-  onChange,
-  cols = 2,
-  required,
-  error,
-  hint,
-  withOther,
-  otherValue = "",
-  onOtherChange,
-  otherError,
-}: TileSelectProps) {
+export function TileSelect(props: TileSelectProps) {
+  const { label, options, cols = 2, required, error, hint } = props;
+
+  const isSelected = (o: string) =>
+    props.multi ? props.value.includes(o) : props.value === o;
+
+  const handleClick = (o: string) => {
+    if (props.multi) {
+      const next = props.value.includes(o)
+        ? props.value.filter((v) => v !== o)
+        : [...props.value, o];
+      props.onChange(next);
+    } else {
+      props.onChange(o);
+    }
+  };
+
   return (
     <div className="mb-6">
       <div className="mb-2.5 flex items-baseline justify-between">
@@ -64,8 +78,10 @@ export function TileSelect({
           {label}
           {required && <span className="ml-1.5 text-apl-yellow">✦</span>}
         </span>
-        {hint && (
-          <span className="font-mono text-[8px] tracking-[0.5px] text-white/25">{hint}</span>
+        {(hint || props.multi) && (
+          <span className="font-mono text-[8px] tracking-[0.5px] text-white/25">
+            {hint ?? "SELECT ALL THAT APPLY"}
+          </span>
         )}
       </div>
 
@@ -74,29 +90,29 @@ export function TileSelect({
         style={{ gridTemplateColumns: `repeat(${Math.min(options.length, cols)}, 1fr)` }}
       >
         {options.map((o) => (
-          <Tile key={o} label={o} selected={value === o} onClick={() => onChange(o)} />
+          <Tile key={o} label={o} selected={isSelected(o)} onClick={() => handleClick(o)} />
         ))}
       </div>
 
-      {withOther && value === "Other" && (
+      {!props.multi && props.withOther && props.value === "Other" && (
         <input
           type="text"
-          value={otherValue}
-          onChange={(e) => onOtherChange?.(e.target.value)}
+          value={props.otherValue ?? ""}
+          onChange={(e) => props.onOtherChange?.(e.target.value)}
           placeholder="Please specify…"
           autoFocus
           className={`mt-2 w-full border bg-[#0d0d0d] px-4 py-[15px] font-sans text-[17px] text-white outline-none transition-all placeholder:text-white/20 ${
-            otherError
+            props.otherError
               ? "border-apl-red/50 bg-apl-red/5"
               : "border-white/[0.09] focus:border-apl-yellow"
           }`}
         />
       )}
 
-      {(error || otherError) && (
+      {(error || (!props.multi && props.otherError)) && (
         <p className="mt-2 flex items-center gap-1.5 font-mono text-[9px] tracking-[0.5px] text-apl-red">
           <span>✕</span>
-          {error ?? otherError}
+          {error ?? (!props.multi ? props.otherError : undefined)}
         </p>
       )}
     </div>
