@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
   const externalId = crypto.randomUUID();
   const statusId = crypto.randomUUID();
   const mappingId = crypto.randomUUID();
+  const now = new Date();
 
   try {
     await client.query("begin");
@@ -90,9 +91,11 @@ export async function POST(req: NextRequest) {
          playing_role,
          sabha_like,
          other_topics,
-         image_urls
+         image_urls,
+         created_at,
+         updated_at
        ) values (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14
        )`,
       [
         externalId,
@@ -106,7 +109,9 @@ export async function POST(req: NextRequest) {
         body.playingRole,
         body.sabhaLike,
         body.otherTopics?.trim() || null,
-        body.imageUrls ?? []
+        body.imageUrls ?? [],
+        now,
+        now
       ]
     );
 
@@ -119,9 +124,11 @@ export async function POST(req: NextRequest) {
          payment_claimed_at,
          payment_done,
          payment_marked_at,
-         admin_notes
-       ) values ($1, $2, false, null, null, false, null, null)`,
-      [statusId, externalId]
+         admin_notes,
+         created_at,
+         updated_at
+       ) values ($1, $2, false, null, null, false, null, null, $3, $4)`,
+      [statusId, externalId, now, now]
     );
 
     await client.query(
@@ -132,9 +139,11 @@ export async function POST(req: NextRequest) {
          external_record_id,
          internal_registration_id,
          sync_status,
-         sync_error
-       ) values ($1, $2, 'external_player_registrations', $3, null, 'EXTERNAL_ONLY', null)`,
-      [mappingId, SOURCE_SYSTEM, externalId]
+         sync_error,
+         created_at,
+         updated_at
+       ) values ($1, $2, 'external_player_registrations', $3, null, 'EXTERNAL_ONLY', null, $4, $5)`,
+      [mappingId, SOURCE_SYSTEM, externalId, now, now]
     );
 
     await client.query("commit");
