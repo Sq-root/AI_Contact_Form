@@ -133,6 +133,13 @@ credentials:
 - username: `admin`
 - password: `nimda`
 
+The external success screen also uses the Spring Boot public endpoint:
+
+- `PATCH /api/external-registrations/{id}/payment-claim`
+
+This marks payment as claimed after the user returns from UPI and confirms completion with the
+same mobile number used during registration.
+
 ## Next Suggested Step
 
 Add Spring Boot read/update APIs for:

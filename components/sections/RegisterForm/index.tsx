@@ -16,6 +16,13 @@ import { Step4Photos } from "./steps/Step4Photos";
 
 const LAST_STEP = STEPS.length; // 4
 
+type RegistrationSuccess = {
+  id: string;
+  paymentClaimed: boolean;
+  paymentReferenceNumber: string | null;
+  paymentDone: boolean;
+};
+
 export default function RegisterForm() {
   const [step,      setStep]      = useState(1);
   const [data,      setData]      = useState<FormData>(INITIAL);
@@ -24,6 +31,7 @@ export default function RegisterForm() {
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const [loading,   setLoading]   = useState(false);
   const [success,   setSuccess]   = useState(false);
+  const [successData, setSuccessData] = useState<RegistrationSuccess | null>(null);
 
   /* ── Field change (clears its own error) ─────────────────────────────── */
 
@@ -135,6 +143,13 @@ export default function RegisterForm() {
       return;
     }
 
+    const payload = (await res.json()) as { id: string };
+    setSuccessData({
+      id: payload.id,
+      paymentClaimed: false,
+      paymentReferenceNumber: null,
+      paymentDone: false
+    });
     setSuccess(true);
   };
 
@@ -142,7 +157,19 @@ export default function RegisterForm() {
 
   /* ── Early exit ───────────────────────────────────────────────────────── */
 
-  if (success) return <SuccessScreen phone={data.phone} uploads={uploads} />;
+  if (success) {
+    return (
+      <SuccessScreen
+        registrationId={successData?.id || ""}
+        phone={data.phone}
+        fullName={data.fullName}
+        uploads={uploads}
+        initialPaymentClaimed={Boolean(successData?.paymentClaimed)}
+        initialPaymentReferenceNumber={successData?.paymentReferenceNumber || null}
+        initialPaymentDone={Boolean(successData?.paymentDone)}
+      />
+    );
+  }
 
   const isLastStep   = step === LAST_STEP;
   const anyUploading = uploads.some((u) => u.uploading);

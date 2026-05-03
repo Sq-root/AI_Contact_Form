@@ -30,6 +30,10 @@ The new external admin page at `/admin` **does** call your Spring Boot backend f
 3. payment status updates
 4. WhatsApp export
 
+The external success screen now also calls your Spring Boot backend for:
+
+5. user-side payment claim confirmation
+
 So the admin page also needs:
 
 3. `NEXT_PUBLIC_API_BASE_URL`
@@ -57,6 +61,10 @@ DATABASE_CONNECTION_TIMEOUT_MS=10000
 DATABASE_IDLE_TIMEOUT_MS=30000
 NEXT_PUBLIC_SITE_URL=https://your-vercel-project.vercel.app
 NEXT_PUBLIC_API_BASE_URL=https://probodham-cricket-registration.onrender.com
+NEXT_PUBLIC_UPI_ID=rnitin1964@okhdfcbank
+NEXT_PUBLIC_UPI_PAYEE_NAME=Raju Shah
+NEXT_PUBLIC_UPI_AMOUNT=500
+NEXT_PUBLIC_UPI_NOTE_PREFIX=APL Reg
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
 OPENROUTER_API_KEY=your-openrouter-api-key
