@@ -23,6 +23,20 @@ So the required production connection for this repo is:
 1. `DATABASE_URL`
 2. `PGSSLMODE=require`
 
+The new external admin page at `/admin` **does** call your Spring Boot backend for:
+
+1. admin login
+2. external registration list
+3. payment status updates
+4. WhatsApp export
+
+So the admin page also needs:
+
+3. `NEXT_PUBLIC_API_BASE_URL`
+
+Your Spring Boot Render service must also allow the external UI origin in CORS through
+`APP_CORS_ALLOWED_ORIGINS`.
+
 ## SQL To Run On Render PostgreSQL
 
 Run:
@@ -42,9 +56,24 @@ DATABASE_POOL_MAX=5
 DATABASE_CONNECTION_TIMEOUT_MS=10000
 DATABASE_IDLE_TIMEOUT_MS=30000
 NEXT_PUBLIC_SITE_URL=https://your-vercel-project.vercel.app
+NEXT_PUBLIC_API_BASE_URL=https://probodham-cricket-registration.onrender.com
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
 OPENROUTER_API_KEY=your-openrouter-api-key
+```
+
+## Render Backend CORS
+
+Update the Spring Boot Render service env so `APP_CORS_ALLOWED_ORIGINS` includes:
+
+1. the main PCL frontend origin
+2. the external UI Vercel origin
+3. localhost origins if you still test locally
+
+Example:
+
+```bash
+APP_CORS_ALLOWED_ORIGINS=https://probodham-cricket-registration.vercel.app,https://your-external-ui.vercel.app,http://localhost:5173,http://localhost:3000
 ```
 
 ## Local Development Variables

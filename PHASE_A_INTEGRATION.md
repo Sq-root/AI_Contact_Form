@@ -113,6 +113,7 @@ DATABASE_POOL_MAX=5
 DATABASE_CONNECTION_TIMEOUT_MS=10000
 DATABASE_IDLE_TIMEOUT_MS=30000
 NEXT_PUBLIC_SITE_URL=https://your-vercel-project.vercel.app
+NEXT_PUBLIC_API_BASE_URL=https://probodham-cricket-registration.onrender.com
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=...
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=...
 OPENROUTER_API_KEY=...
@@ -125,6 +126,12 @@ The Spring Boot backend should use the same Render PostgreSQL instance so the ad
 - `external_player_registrations`
 - `external_registration_status`
 - `external_registration_mappings`
+
+The external admin page at `/admin` uses the Spring Boot endpoints with the secondary admin
+credentials:
+
+- username: `admin`
+- password: `nimda`
 
 ## Next Suggested Step
 
