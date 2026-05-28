@@ -11,6 +11,8 @@ const config: Config = {
         apl: {
           ink:     "var(--apl-ink)",
           yellow:  "var(--apl-yellow)",
+          gold:    "var(--apl-gold)",
+          green:   "var(--apl-green)",
           red:     "var(--apl-red)",
           surface: "var(--apl-surface)",
           line:    "var(--apl-line)",

@@ -1,16 +1,21 @@
-/* ─── APL Season 3 — All data constants ────────────────────────────────────── */
+/* ─── Divine Premier League — All data constants ────────────────────────────── */
 
 export const APL_SEASON = {
-  number: "03",
-  opening: "06·06·2026",
-  venue: "AKSHAR ARENA",
+  leagueName: "Divine Premier League",
+  leagueShort: "DPL",
+  monogram: "D",
+  number: "04",
+  opening: "21·06·2026",
+  venue: "Lush Turf, Mira Road",
   format: "T10 · 6-OVER",
   teams: "10+",
   players: "100+",
+  headlineLine1: "WE ARE ONE,",
+  headlineLine2: "WE FOR ONE.",
 } as const;
 
 export const APL_STATS: { number: string; label: string }[] = [
-  { number: "03", label: "SEASON" },
+  { number: "04", label: "SEASON" },
   { number: "10+", label: "TEAMS" },
   { number: "100+", label: "PLAYERS" },
   { number: "04", label: "PILLARS" },
@@ -77,10 +82,9 @@ export const APL_GALLERY: {
 /* ─── Registration form data ─────────────────────────────────────────────── */
 
 export const APL_ROLES = [
-  "BATSMAN",
-  "BOWLER",
-  "ALL-ROUNDER",
-  "WICKET-KEEPER",
+  "As Captain",
+  "As Vice Captain",
+  "As a Participant",
 ] as const;
 
 export const APL_TEAMS = [
@@ -94,14 +98,6 @@ export const APL_TEAMS = [
 export const APL_JERSEY_SIZES = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 
 export const APL_FORM_STEPS = 6;
-
-export const FIELD_OF_STUDY_OPTIONS = [
-  "School",
-  "Commerce",
-  "Arts",
-  "Science",
-  "Other",
-] as const;
 
 export const BATTING_STYLES = ["Right-handed", "Left-handed"] as const;
 export const BOWLING_STYLES = ["Right-handed", "Left-handed"] as const;
@@ -117,11 +113,7 @@ export const SABHA_LIKES = [
 /* ─── Ticker / Marquee strings ───────────────────────────────────────────── */
 
 export const TICKER_TEXT =
-  "★ APL S3 ★ NOW REGISTERING ★ 12 TEAMS · 64 PLAYERS ★ OPENING 06·06·2026 ★ " +
-  "APL S3 ★ NOW REGISTERING ★ 12 TEAMS · 64 PLAYERS ★ OPENING 06·06·2026 ★ ";
+  "★ DPL S4 ★ NOW REGISTERING ★ 10+ TEAMS · 100 PLAYERS ★ OPENING 21·06·2026 ★ " +
+  "DPL S4 ★ NOW REGISTERING ★ 10+ TEAMS · 100 PLAYERS ★ OPENING 21·06·2026 ★ ";
 
-export const NAV_LINKS = [
-  { label: "About", href: "/#about" },
-  { label: "Pillars", href: "/#pillars" },
-  { label: "Gallery", href: "/#gallery" },
-] as const;
+export const NAV_LINKS: { label: string; href: string }[] = [];

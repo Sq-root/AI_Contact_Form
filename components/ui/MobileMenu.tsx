@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { NAV_LINKS } from "@/lib/constants";
+import { APL_SEASON, NAV_LINKS } from "@/lib/constants";
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -51,9 +51,9 @@ export default function MobileMenu() {
       >
         {/* Top bar */}
         <div className="flex items-center justify-between border-b border-apl-line px-5 py-4">
-          <div className="font-anton text-[13px] tracking-[2px]">
-            AKSHAR PREMIER
-            <span className="ml-2 text-apl-yellow">· S3</span>
+          <div className="font-anton text-[13px] tracking-[2px] uppercase">
+            {APL_SEASON.leagueName.split(" ").slice(0, 2).join(" ")}
+            <span className="ml-2 text-apl-yellow">· S{parseInt(APL_SEASON.number, 10)}</span>
           </div>
           <button
             onClick={close}

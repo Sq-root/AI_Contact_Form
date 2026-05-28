@@ -1,8 +1,6 @@
 import { useRef, useState } from "react";
 import { StepHeader } from "../StepHeader";
-import type { Step4Props, UploadItem } from "../types";
-
-/* ─── DropZone (only renders when no image is uploaded yet) ───────────────── */
+import type { Step3PhotosProps, UploadItem } from "../types";
 
 function DropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
   const [over, setOver] = useState(false);
@@ -24,7 +22,7 @@ function DropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
       className={`cursor-pointer border-2 border-dashed py-20 text-center transition-all duration-200 ${
         over
           ? "border-apl-yellow bg-apl-yellow/5"
-          : "border-white/[0.10] hover:border-white/22 hover:bg-white/[0.02]"
+          : "border-white/[0.12] hover:border-white/25 hover:bg-white/[0.03]"
       }`}
     >
       <input
@@ -34,33 +32,31 @@ function DropZone({ onAdd }: { onAdd: (files: FileList) => void }) {
         className="sr-only"
         onChange={(e) => { if (e.target.files) onAdd(e.target.files); e.target.value = ""; }}
       />
-      <span className="block font-anton text-[64px] leading-none text-white/12">↑</span>
-      <p className="mt-4 font-mono text-[11px] tracking-[2.5px] text-white/45">
+      <span className="block font-anton text-[64px] leading-none text-white/15">↑</span>
+      <p className="mt-4 font-mono text-[11px] tracking-[2.5px] text-white/55">
         DRAG &amp; DROP OR CLICK TO BROWSE
       </p>
-      <p className="mt-1.5 font-mono text-[9px] tracking-[1.5px] text-white/25">
+      <p className="mt-1.5 font-mono text-[9px] tracking-[1.5px] text-white/30">
         ONE PHOTO · JPG · PNG · WEBP · MAX 5 MB
       </p>
     </div>
   );
 }
 
-/* ─── Preview (single hero card) ──────────────────────────────────────────── */
-
 function Preview({
   item,
   onReplace,
   onRemove,
 }: {
-  item:      UploadItem;
+  item: UploadItem;
   onReplace: (files: FileList) => void;
-  onRemove:  () => void;
+  onRemove: () => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
     <div className="relative">
-      <div className="relative overflow-hidden border border-white/[0.09] bg-[#0d0d0d]">
+      <div className="relative overflow-hidden border border-white/[0.12] bg-[#041513]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={item.localUrl} alt={item.file.name} className="aspect-square w-full object-cover" />
 
@@ -86,7 +82,7 @@ function Preview({
         )}
       </div>
 
-      <p className="mt-2 truncate font-mono text-[9px] tracking-[1px] text-white/35">
+      <p className="mt-2 truncate font-mono text-[9px] tracking-[1px] text-white/40">
         {item.file.name}
       </p>
 
@@ -101,14 +97,14 @@ function Preview({
         <button
           type="button"
           onClick={() => ref.current?.click()}
-          className="border border-white/[0.12] py-3 font-mono text-[10px] tracking-[2px] text-white/65 transition hover:border-apl-yellow/60 hover:text-apl-yellow"
+          className="border border-white/[0.14] py-3 font-mono text-[10px] tracking-[2px] text-white/70 transition hover:border-apl-yellow/60 hover:text-apl-yellow"
         >
           ↻ REPLACE PHOTO
         </button>
         <button
           type="button"
           onClick={onRemove}
-          className="border border-white/[0.08] py-3 font-mono text-[10px] tracking-[2px] text-white/45 transition hover:border-apl-red/60 hover:text-apl-red"
+          className="border border-white/[0.1] py-3 font-mono text-[10px] tracking-[2px] text-white/50 transition hover:border-apl-red/60 hover:text-apl-red"
         >
           ✕ REMOVE
         </button>
@@ -117,23 +113,21 @@ function Preview({
   );
 }
 
-/* ─── Step4Photos ─────────────────────────────────────────────────────────── */
-
-export function Step4Photos({
+export function Step3Photos({
   errors,
   uploads,
   uploadErr,
   onAddImages,
   onRemoveImage,
-}: Step4Props) {
+}: Step3PhotosProps) {
   const current = uploads[0];
 
   return (
     <>
       <StepHeader
-        eyebrow="// STEP 04 OF 04"
+        eyebrow="// STEP 03 OF 03"
         title={<>Profile <span className="text-apl-yellow">image.</span></>}
-        sub="Upload one clear profile photo of yourself."
+        sub="Upload one clear profile photo. It will also be used to generate your AI avatar."
       />
 
       {current ? (
@@ -154,12 +148,6 @@ export function Step4Photos({
 
       {uploadErr && (
         <p className="mt-3 font-mono text-[9px] text-apl-red">{uploadErr}</p>
-      )}
-
-      {errors._server && (
-        <div className="mt-6 border border-apl-red/30 bg-apl-red/10 px-5 py-4 font-mono text-[10px] tracking-[0.5px] text-apl-red">
-          ✕ {errors._server}
-        </div>
       )}
     </>
   );

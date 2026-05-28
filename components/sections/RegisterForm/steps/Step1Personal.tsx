@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/Input";
-import { TileSelect } from "@/components/ui/TileSelect";
-import { FIELD_OF_STUDY_OPTIONS } from "@/lib/constants";
+import { Textarea } from "@/components/ui/Textarea";
 import { StepHeader } from "../StepHeader";
 import type { StepProps } from "../types";
 
@@ -8,13 +7,13 @@ export function Step1Personal({ data, errors, onChange }: StepProps) {
   return (
     <>
       <StepHeader
-        eyebrow="// STEP 01 OF 04"
-        title={<>Who are <span className="text-apl-yellow">you?</span></>}
-        sub="Tell us who you are so we can set up your registration."
+        eyebrow="// STEP 01 OF 03"
+        title={<>Player <span className="text-apl-yellow">details.</span></>}
+        sub="Share your contact details for tournament registration."
       />
 
       <Input
-        label="Full Name"
+        label="Name"
         value={data.fullName}
         onChange={(e) => onChange("fullName", e.target.value)}
         placeholder="e.g. Aarav Patel"
@@ -23,7 +22,7 @@ export function Step1Personal({ data, errors, onChange }: StepProps) {
       />
 
       <Input
-        label="Phone Number"
+        label="Mobile No"
         type="tel"
         value={data.phone}
         onChange={(e) => onChange("phone", e.target.value)}
@@ -33,18 +32,13 @@ export function Step1Personal({ data, errors, onChange }: StepProps) {
         error={errors.phone}
       />
 
-      <TileSelect
-        label="Field of Study"
-        options={FIELD_OF_STUDY_OPTIONS}
-        value={data.fieldOfStudy}
-        onChange={(v) => onChange("fieldOfStudy", v)}
-        cols={2}
+      <Textarea
+        label="Address"
+        value={data.address}
+        onChange={(e) => onChange("address", e.target.value)}
+        placeholder="Enter your full address"
         required
-        error={errors.fieldOfStudy}
-        withOther
-        otherValue={data.fieldOfStudyOther}
-        onOtherChange={(v) => onChange("fieldOfStudyOther", v)}
-        otherError={errors.fieldOfStudyOther}
+        error={errors.address}
       />
     </>
   );

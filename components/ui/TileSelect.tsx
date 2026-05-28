@@ -41,7 +41,7 @@ function Tile({
       className={`relative border px-4 py-[18px] text-left font-anton text-[14px] uppercase tracking-[1px] transition-all duration-150 active:scale-[0.97] md:text-[16px] ${
         selected
           ? "border-apl-yellow bg-apl-yellow text-apl-ink"
-          : "border-white/[0.09] bg-[#0d0d0d] text-white hover:border-apl-yellow/40 hover:bg-[#141414]"
+          : "border-white/[0.09] bg-white/[0.04] text-white hover:border-apl-yellow/40 hover:bg-white/[0.08]"
       }`}
     >
       <span

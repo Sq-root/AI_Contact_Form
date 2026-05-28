@@ -1,6 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { APL_SEASON } from "@/lib/constants";
+
+const seasonNum = parseInt(APL_SEASON.number, 10);
 
 type AdminCredentials = {
   username: string;
@@ -91,18 +94,18 @@ function buildWhatsAppReminderUrl(player: ExternalRegistration) {
   if (!digits.startsWith("91") && digits.length < 12) digits = `91${digits}`;
 
   const reminderText = [
-    `🏏 *APL Season 03 — Reminder*`,
+    `🏏 *${APL_SEASON.leagueShort} Season ${APL_SEASON.number} — Reminder*`,
     ``,
     `Hey *${player.fullName}*! 👋`,
     ``,
-    `This is a friendly reminder regarding your APL Season 3 registration.`,
-    `💰 Please complete your registration payment to secure your spot in Season 03.`,
+    `This is a friendly reminder regarding your ${APL_SEASON.leagueShort} Season ${seasonNum} registration.`,
+    `💰 Please complete your registration payment to secure your spot in Season ${APL_SEASON.number}.`,
     ``,
-    `📅 Opening: *06·06·2026*`,
-    `📍 Venue: *AKSHAR ARENA*`,
+    `📅 Opening: *${APL_SEASON.opening}*`,
+    `📍 Venue: *${APL_SEASON.venue}*`,
     ``,
     `Feel free to reach out if you have any questions!`,
-    `— APL Admin Team`,
+    `— ${APL_SEASON.leagueShort} Admin Team`,
   ].join("\n");
 
   return `https://wa.me/${digits}?text=${encodeURIComponent(reminderText)}`;
@@ -123,7 +126,6 @@ function filterPlayers(
         player.referenceName,
         player.fieldOfStudy,
         player.playingRole,
-        player.sabhaLike,
       ]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(query));
@@ -221,9 +223,9 @@ function PlayerCard({
               <InfoRow k="Batting" v={player.battingStyle} />
               <InfoRow k="Bowling" v={player.bowlingStyle} />
             </InfoBlock>
-            <InfoBlock label="Sabha & Study">
-              <InfoRow k="Field" v={player.fieldOfStudy} />
-              <InfoRow k="Focus" v={player.sabhaLike} />
+            <InfoBlock label="Contact">
+              <InfoRow k="Address" v={player.fieldOfStudy} />
+              <InfoRow k="Type" v={player.sabhaLike} />
               {player.otherTopics && (
                 <InfoRow k="Other" v={player.otherTopics} />
               )}

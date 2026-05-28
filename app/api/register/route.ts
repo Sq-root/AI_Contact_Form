@@ -7,13 +7,11 @@ const SOURCE_SYSTEM = "AI_CONTACT_FORM";
 interface RegisterPayload {
   fullName: string;
   phone: string;
-  fieldOfStudy: string;
+  address: string;
   battingStyle: string;
   bowlingStyle: string;
   referenceName: string;
   playingRole: string;
-  sabhaLike: string;
-  otherTopics?: string;
   imageUrls?: string[];
 }
 
@@ -31,8 +29,8 @@ function serverValidate(body: RegisterPayload): string | null {
     return "Enter a valid 10-digit Indian mobile number.";
   }
 
-  if (!body.fieldOfStudy?.trim()) {
-    return "Field of study is required.";
+  if (!body.address?.trim()) {
+    return "Address is required.";
   }
   if (!body.battingStyle) {
     return "Batting style is required.";
@@ -46,10 +44,6 @@ function serverValidate(body: RegisterPayload): string | null {
   if (!body.playingRole) {
     return "Playing role is required.";
   }
-  if (!body.sabhaLike) {
-    return "Sabha preference is required.";
-  }
-
   return null;
 }
 
@@ -102,14 +96,14 @@ export async function POST(req: NextRequest) {
         SOURCE_SYSTEM,
         body.fullName.trim(),
         normalizedPhone,
-        body.fieldOfStudy.trim(),
+        body.address.trim(),
         body.battingStyle,
         body.bowlingStyle,
         body.referenceName.trim(),
         body.playingRole,
-        body.sabhaLike,
-        body.otherTopics?.trim() || null,
-        body.imageUrls ?? [],
+        "Tournament registration",
+        null,
+        Array.isArray(body.imageUrls) ? body.imageUrls : [],
         now,
         now
       ]

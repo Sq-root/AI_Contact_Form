@@ -4,14 +4,16 @@
 
 /* ─── APL Design Tokens ───────────────────────────────────────────────────── */
 :root {
-  --apl-ink:     #0a0a0a;
-  --apl-yellow:  #FFC31F;
-  --apl-red:     #E11D2A;
-  --apl-surface: #181818;
-  --apl-line:    rgba(255, 255, 255, 0.1);
-  --apl-line-strong: rgba(255, 255, 255, 0.2);
-  --apl-muted:   rgba(255, 255, 255, 0.55);
-  --apl-body:    rgba(255, 255, 255, 0.75);
+  --apl-ink:     #051f15; /* Deep Forest Green */
+  --apl-yellow:  #f2c94c; /* Classic Gold */
+  --apl-gold:    #f2c94c; /* Classic Gold */
+  --apl-green:   #10b981; /* Emerald Green */
+  --apl-red:     #ef4444; /* Crisp Red */
+  --apl-surface: #0a3323; /* Lighter Forest Green */
+  --apl-line:    rgba(255, 255, 255, 0.12);
+  --apl-line-strong: rgba(242, 201, 76, 0.4);
+  --apl-muted:   rgba(255, 255, 255, 0.6);
+  --apl-body:    rgba(255, 255, 255, 0.9);
 
   /* Typography */
   --font-inter:  "Inter", sans-serif;
@@ -76,9 +78,28 @@
   /* APL radial gradient page background */
   .bg-apl-page {
     background:
-      radial-gradient(ellipse at top,    rgba(255, 195, 31, 0.08), transparent 50%),
-      radial-gradient(ellipse at bottom, rgba(225,  29, 42, 0.06), transparent 50%),
+      radial-gradient(ellipse at top,    rgba(242, 201, 76, 0.11), transparent 52%),
+      radial-gradient(ellipse at bottom, rgba(16, 185, 129, 0.1), transparent 50%),
       var(--apl-ink);
+  }
+
+  .adelaide-photo-bg {
+    background-image:
+      linear-gradient(90deg, rgba(5, 31, 21, 0.97) 0%, rgba(5, 31, 21, 0.86) 42%, rgba(5, 31, 21, 0.46) 74%, rgba(5, 31, 21, 0.7) 100%),
+      linear-gradient(180deg, rgba(5, 31, 21, 0.34) 0%, rgba(5, 31, 21, 0.08) 42%, rgba(5, 31, 21, 0.94) 100%),
+      url("/images/cricket-stadium.png");
+    background-position: center;
+    background-size: cover;
+  }
+
+  .adelaide-register-bg {
+    background-image:
+      linear-gradient(180deg, rgba(5, 31, 21, 0.74) 0%, rgba(5, 31, 21, 0.9) 52%, rgba(5, 31, 21, 0.98) 100%),
+      radial-gradient(circle at 28% 8%, rgba(242, 201, 76, 0.2), transparent 34%),
+      url("/images/cricket-stadium.png");
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
   }
 
   /* Diagonal stripe overlay */
@@ -97,6 +118,15 @@
       linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
     background-size: 40px 40px;
     mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+
+  .bg-pitch-lines {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      repeating-linear-gradient(110deg, transparent 0 26px, rgba(242, 201, 76, 0.1) 26px 27px, transparent 27px 54px);
+    background-size: 84px 84px, 84px 84px, auto;
+    mask-image: linear-gradient(90deg, #000 0%, #000 48%, transparent 88%);
   }
 
   /* Shimmer on buttons */

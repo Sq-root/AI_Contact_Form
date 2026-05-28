@@ -21,7 +21,7 @@ const paymentConfig = {
   upiId: process.env.NEXT_PUBLIC_UPI_ID || "sondagarchirag01-2@okicici",
   payeeName: process.env.NEXT_PUBLIC_UPI_PAYEE_NAME || "CHIRAG RATILAL SONDAGAR",
   amount: process.env.NEXT_PUBLIC_UPI_AMOUNT || "350",
-  notePrefix: process.env.NEXT_PUBLIC_UPI_NOTE_PREFIX || "APL Reg"
+  notePrefix: process.env.NEXT_PUBLIC_UPI_NOTE_PREFIX || `${APL_SEASON.leagueShort} Reg`
 };
 
 const upiNoteLimit = 50;
@@ -132,7 +132,10 @@ export function SuccessScreen({
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiQrUri)}`;
 
   useEffect(() => {
-    // Avatar generation can be re-enabled here later if the flow needs it.
+    if (sourcePhotoUrl) {
+      void generate(sourcePhotoUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourcePhotoUrl]);
 
   useEffect(() => {
@@ -273,11 +276,11 @@ export function SuccessScreen({
       <h1 className="text-center font-anton text-[60px] uppercase leading-[0.82] md:text-[88px]">
         WELCOME TO
         <br />
-        <span className="text-apl-yellow">SEASON 3.</span>
+        <span className="text-apl-yellow">SEASON {APL_SEASON.number}.</span>
       </h1>
       <p className="mt-6 max-w-[360px] text-center font-sans text-[15px] leading-[1.7] text-white/55">
         Confirmation sent to <strong className="font-sans text-white">{phone}</strong>. See you at{" "}
-        <strong className="font-sans text-apl-yellow">Akshar Arena</strong>.
+        <strong className="font-sans text-apl-yellow">{APL_SEASON.venue}</strong>.
       </p>
 
       <div className="mt-10 grid w-full max-w-[440px] grid-cols-2 gap-2">
@@ -286,7 +289,7 @@ export function SuccessScreen({
           <p className="mt-1.5 font-mono text-[8px] tracking-[2px] text-white/35">OPENING DAY</p>
         </div>
         <div className="border border-white/[0.07] bg-apl-surface py-6 text-center">
-          <p className="font-anton text-[30px] leading-none text-apl-yellow">#APL3</p>
+          <p className="font-anton text-[30px] leading-none text-apl-yellow">#{APL_SEASON.leagueShort}{parseInt(APL_SEASON.number, 10)}</p>
           <p className="mt-1.5 font-mono text-[8px] tracking-[2px] text-white/35">YOUR HASHTAG</p>
         </div>
       </div>
@@ -413,13 +416,13 @@ export function SuccessScreen({
         </p>
       </section>
 
-      {/* sourcePhotoUrl && (
+      {sourcePhotoUrl && (
         <AvatarSection
           state={avatar}
           onRetry={() => generate(sourcePhotoUrl)}
           onDownload={downloadAvatar}
         />
-      ) */}
+      )}
 
       <Link
         href="/"

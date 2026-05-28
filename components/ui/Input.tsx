@@ -22,10 +22,10 @@ export function Input({ label, error, hint, required, className, ...props }: Inp
       <input
         required={required}
         {...props}
-        className={`w-full border bg-[#0d0d0d] px-4 py-[15px] font-sans text-[17px] text-white outline-none transition-all placeholder:text-white/20 ${
+        className={`w-full border bg-white/[0.04] px-4 py-[15px] font-sans text-[17px] text-white outline-none transition-all placeholder:text-white/20 ${
           error
             ? "border-apl-red/50 bg-apl-red/5 focus:border-apl-red/70"
-            : "border-white/[0.09] focus:border-apl-yellow focus:bg-[#111]"
+            : "border-white/[0.09] focus:border-apl-yellow focus:bg-white/[0.08]"
         } ${className ?? ""}`}
       />
 

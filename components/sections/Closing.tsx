@@ -11,9 +11,12 @@ export default function Closing() {
   ];
 
   return (
-    <section className="relative overflow-hidden border-t-[3px] border-apl-yellow bg-apl-red">
+    <section className="relative overflow-hidden border-t border-white/[0.08] bg-gradient-to-b from-[#031312] to-[#010908]">
+      {/* Decorative red glowing orb behind for subtle warmth instead of flat red */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[450px] w-[450px] rounded-full bg-apl-red/12 blur-[120px]" />
+      
       {/* Diagonal stripe */}
-      <div className="bg-stripe pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+      <div className="bg-stripe pointer-events-none absolute inset-0 opacity-[0.25]" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-[1280px] px-5 py-14 md:px-10 md:py-18 lg:px-16 lg:py-24">
 
@@ -27,7 +30,7 @@ export default function Closing() {
             </p>
             <h2 className="m-0 font-anton uppercase leading-[0.82] text-white
                            text-[clamp(52px,8vw,88px)]">
-              SEASON 3
+              SEASON {APL_SEASON.number}
               <br />
               <span className="text-apl-yellow">IS CALLING.</span>
             </h2>
@@ -50,7 +53,7 @@ export default function Closing() {
                             md:p-7 md:text-[12px]">
               <div className="mb-3 border-b border-dashed border-white/25 pb-3 font-anton tracking-[1.5px]
                               text-[20px] md:text-[24px]">
-                SEASON · 03 · TICKET
+                SEASON · {APL_SEASON.number} · TICKET
               </div>
               {rows.map(({ label, value }) => (
                 <div key={label} className="flex items-baseline justify-between py-[1px]">

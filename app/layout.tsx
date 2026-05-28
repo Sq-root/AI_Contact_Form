@@ -28,15 +28,15 @@ const venueName = APL_SEASON.venue.split(' ').map(w => w.charAt(0).toUpperCase()
 
 export const metadata: Metadata = {
   title: {
-    default: `APL Season ${seasonNum} — Akshar Premier League`,
-    template: `%s | APL Season ${seasonNum}`,
+    default: `${APL_SEASON.leagueShort} Season ${seasonNum} — ${APL_SEASON.leagueName}`,
+    template: `%s | ${APL_SEASON.leagueShort} Season ${seasonNum}`,
   },
   description:
-    `Where cricket meets character. Register for APL Season ${seasonNum} — Brotherhood, Atmiyata, Discipline, Surrender, Prayer & Growth. Opening ${APL_SEASON.opening} at ${venueName}.`,
+    `Where cricket meets character. Register for ${APL_SEASON.leagueShort} Season ${seasonNum} — Brotherhood, Atmiyata, Discipline, Surrender, Prayer & Growth. Opening ${APL_SEASON.opening} at ${venueName}.`,
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "Akshar Premier League",
+    siteName: APL_SEASON.leagueName,
   },
   robots: { index: true, follow: true },
 };
