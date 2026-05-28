@@ -99,7 +99,7 @@ export default function Hero() {
           <div className="animate-fade-up hidden rounded-lg border border-white/16 bg-white/[0.1] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-md lg:block">
             <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-[#06251f]">
               <Image
-                src="/images/cs.png"
+                src="/images/pcc.jpeg"
                 alt="Modern night cricket stadium with bright gold and green floodlights"
                 fill
                 priority
