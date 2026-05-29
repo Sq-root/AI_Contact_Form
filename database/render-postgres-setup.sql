@@ -14,8 +14,6 @@ create table if not exists external_player_registrations (
   playing_role text not null,
 
   sabha_like text not null,
-  player_role text not null default 'PLAYER',
-  sabha_short_code text not null default 'UNKNOWN',
   other_topics text,
   image_urls text[] default '{}',
 
