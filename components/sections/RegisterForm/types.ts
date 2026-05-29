@@ -20,7 +20,6 @@ export const STEPS = [
 export const INITIAL: FormData = {
   fullName: "",
   phone: "",
-  address: "",
   playingRole: "",
   battingStyle: "",
   bowlingStyle: "",

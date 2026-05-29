@@ -127,7 +127,7 @@ export function Step3Photos({
       <StepHeader
         eyebrow="// STEP 03 OF 03"
         title={<>Profile <span className="text-apl-yellow">image.</span></>}
-        sub="Upload one clear profile photo. It will also be used to generate your AI avatar."
+        sub="Upload one clear profile photo for your tournament registration."
       />
 
       {current ? (

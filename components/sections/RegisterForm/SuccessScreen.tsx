@@ -3,13 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { APL_SEASON } from "@/lib/constants";
-import type { UploadItem } from "./types";
-
-type AvatarState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "ready"; src: string }
-  | { status: "error"; message: string };
 
 type PaymentClaimState = {
   paymentClaimed: boolean;
@@ -95,7 +88,6 @@ export function SuccessScreen({
   registrationId,
   phone,
   fullName,
-  uploads,
   initialPaymentClaimed,
   initialPaymentReferenceNumber,
   initialPaymentDone
@@ -103,14 +95,10 @@ export function SuccessScreen({
   registrationId: string;
   phone: string;
   fullName: string;
-  uploads: UploadItem[];
   initialPaymentClaimed: boolean;
   initialPaymentReferenceNumber: string | null;
   initialPaymentDone: boolean;
 }) {
-  const sourcePhotoUrl = uploads.find((u) => u.storageUrl)?.storageUrl ?? null;
-
-  const [avatar, setAvatar] = useState<AvatarState>({ status: "idle" });
   const [paymentState, setPaymentState] = useState<PaymentClaimState>({
     paymentClaimed: initialPaymentClaimed,
     paymentReferenceNumber: initialPaymentReferenceNumber,
@@ -132,13 +120,6 @@ export function SuccessScreen({
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiQrUri)}`;
 
   useEffect(() => {
-    if (sourcePhotoUrl) {
-      void generate(sourcePhotoUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sourcePhotoUrl]);
-
-  useEffect(() => {
     if (!paymentAppOpened || paymentState.paymentClaimed || paymentState.paymentDone) {
       return undefined;
     }
@@ -158,36 +139,6 @@ export function SuccessScreen({
       window.removeEventListener("focus", showReturnPrompt);
     };
   }, [paymentAppOpened, paymentState.paymentClaimed, paymentState.paymentDone]);
-
-  async function generate(imageUrl: string) {
-    setAvatar({ status: "loading" });
-    try {
-      const res = await fetch("/api/avatar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl })
-      });
-
-      if (!res.ok) {
-        const { error } = await res.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(error ?? "Avatar generation failed");
-      }
-      const { image } = await res.json();
-      setAvatar({ status: "ready", src: image });
-    } catch (err) {
-      setAvatar({ status: "error", message: (err as Error).message });
-    }
-  }
-
-  function downloadAvatar() {
-    if (avatar.status !== "ready") return;
-    const a = document.createElement("a");
-    a.href = avatar.src;
-    a.download = `apl-s3-avatar-${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
 
   async function copyPaymentText(value: string, message: string) {
     try {
@@ -416,109 +367,12 @@ export function SuccessScreen({
         </p>
       </section>
 
-      {sourcePhotoUrl && (
-        <AvatarSection
-          state={avatar}
-          onRetry={() => generate(sourcePhotoUrl)}
-          onDownload={downloadAvatar}
-        />
-      )}
-
       <Link
         href="/"
         className="mt-12 border border-white/20 px-10 py-4 font-mono text-[11px] tracking-[2.5px] text-white transition hover:border-white/40"
       >
         BACK TO HOME
       </Link>
-    </div>
-  );
-}
-
-function AvatarSection({
-  state,
-  onRetry,
-  onDownload
-}: {
-  state: AvatarState;
-  onRetry: () => void;
-  onDownload: () => void;
-}) {
-  return (
-    <section className="mt-14 w-full max-w-[440px]">
-      <div className="mb-4 flex items-baseline justify-between">
-        <p className="font-mono text-[10px] tracking-[2.5px] text-apl-yellow">// YOUR AI AVATAR</p>
-        <p className="font-mono text-[8px] tracking-[1.5px] text-white/25">POWERED BY GEMINI</p>
-      </div>
-
-      <div
-        className="relative aspect-square overflow-hidden border border-apl-yellow/20 bg-[#0d0d0d]"
-        style={{ boxShadow: "0 30px 80px -30px rgba(255,195,31,0.18)" }}
-      >
-        {state.status === "loading" && <AvatarSkeleton />}
-        {state.status === "idle" && <AvatarSkeleton />}
-
-        {state.status === "ready" && (
-          <img
-            src={state.src}
-            alt="AI-generated avatar"
-            className="h-full w-full animate-apl-pop object-cover"
-          />
-        )}
-
-        {state.status === "error" && (
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <span className="font-anton text-[40px] leading-none text-apl-red/70">!</span>
-            <p className="font-mono text-[10px] leading-relaxed tracking-[1px] text-white/55">
-              {state.message}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {state.status === "ready" && (
-        <button
-          type="button"
-          onClick={onDownload}
-          className="shimmer relative mt-4 w-full overflow-hidden bg-apl-yellow py-[15px] font-anton text-[15px] tracking-[2px] text-apl-ink transition-transform hover:-translate-y-[1px] active:scale-[0.99]"
-        >
-          DOWNLOAD AVATAR
-        </button>
-      )}
-
-      {state.status === "error" && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-4 w-full border border-white/20 py-[15px] font-mono text-[11px] tracking-[2.5px] text-white transition hover:border-apl-yellow hover:text-apl-yellow"
-        >
-          TRY AGAIN
-        </button>
-      )}
-
-      {state.status === "loading" && (
-        <p className="mt-4 text-center font-mono text-[9px] tracking-[2px] text-white/35">
-          GENERATING � TYPICALLY 10�20 SECONDS
-        </p>
-      )}
-    </section>
-  );
-}
-
-function AvatarSkeleton() {
-  return (
-    <div className="relative h-full w-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#101010] via-[#161616] to-[#0a0a0a]" />
-      <div
-        className="absolute inset-0 animate-skeleton"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(255,195,31,0.06) 50%, transparent 100%)"
-        }}
-      />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-white/10 border-t-apl-yellow" />
-        <span className="font-mono text-[9px] tracking-[3px] text-white/35">RENDERING</span>
-      </div>
     </div>
   );
 }

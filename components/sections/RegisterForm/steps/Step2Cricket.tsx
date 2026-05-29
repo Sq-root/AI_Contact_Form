@@ -45,7 +45,7 @@ export function Step2Cricket({ data, errors, onChange }: StepProps) {
         label="Reference Name"
         value={data.referenceName}
         onChange={(e) => onChange("referenceName", e.target.value)}
-        placeholder="e.g. Harshil Soni"
+        placeholder="e.g. Tushar Gohil"
         required
         error={errors.referenceName}
       />

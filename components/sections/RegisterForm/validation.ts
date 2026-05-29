@@ -12,9 +12,6 @@ export function validateStep(step: number, data: FormData): FieldErrors {
     if (!/^(91|0)?[6-9]\d{9}$/.test(phone)) {
       e.phone = "Enter a valid 10-digit Indian mobile number";
     }
-    if (!data.address.trim()) {
-      e.address = "Address is required";
-    }
   }
 
   if (step === 2) {

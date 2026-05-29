@@ -1,5 +1,4 @@
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
 import { StepHeader } from "../StepHeader";
 import type { StepProps } from "../types";
 
@@ -30,15 +29,6 @@ export function Step1Personal({ data, errors, onChange }: StepProps) {
         required
         hint="Indian 10-digit"
         error={errors.phone}
-      />
-
-      <Textarea
-        label="Address"
-        value={data.address}
-        onChange={(e) => onChange("address", e.target.value)}
-        placeholder="Enter your full address"
-        required
-        error={errors.address}
       />
     </>
   );

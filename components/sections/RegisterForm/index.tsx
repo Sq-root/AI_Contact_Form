@@ -105,15 +105,17 @@ export default function RegisterForm() {
     setLoading(true);
     setErrors({});
 
+    const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+    const registerUrl = `${apiBase}/api/register`;
+
     let res: Response;
     try {
-      res = await fetch("/api/register", {
+      res = await fetch(registerUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fullName: data.fullName,
           phone: data.phone,
-          address: data.address,
           battingStyle: data.battingStyle,
           bowlingStyle: data.bowlingStyle,
           referenceName: data.referenceName,
@@ -156,7 +158,6 @@ export default function RegisterForm() {
         registrationId={successData?.id || ""}
         phone={data.phone}
         fullName={data.fullName}
-        uploads={uploads}
         initialPaymentClaimed={Boolean(successData?.paymentClaimed)}
         initialPaymentReferenceNumber={successData?.paymentReferenceNumber || null}
         initialPaymentDone={Boolean(successData?.paymentDone)}

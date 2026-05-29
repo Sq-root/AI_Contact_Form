@@ -7,7 +7,6 @@ const SOURCE_SYSTEM = "AI_CONTACT_FORM";
 interface RegisterPayload {
   fullName: string;
   phone: string;
-  address: string;
   battingStyle: string;
   bowlingStyle: string;
   referenceName: string;
@@ -29,9 +28,6 @@ function serverValidate(body: RegisterPayload): string | null {
     return "Enter a valid 10-digit Indian mobile number.";
   }
 
-  if (!body.address?.trim()) {
-    return "Address is required.";
-  }
   if (!body.battingStyle) {
     return "Batting style is required.";
   }
@@ -96,7 +92,7 @@ export async function POST(req: NextRequest) {
         SOURCE_SYSTEM,
         body.fullName.trim(),
         normalizedPhone,
-        body.address.trim(),
+        "",
         body.battingStyle,
         body.bowlingStyle,
         body.referenceName.trim(),

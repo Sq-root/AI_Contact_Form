@@ -26,7 +26,6 @@ export interface GalleryItem {
 export interface FormData {
   fullName: string;
   phone: string;
-  address: string;
   playingRole: string;
   battingStyle: string;
   bowlingStyle: string;
