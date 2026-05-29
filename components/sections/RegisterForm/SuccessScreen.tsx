@@ -170,7 +170,7 @@ export function SuccessScreen({
     setPaymentStatus("Saving your payment confirmation...");
 
     try {
-      const response = await fetch(`${apiBaseUrl()}/api/external-registrations/${registrationId}/payment-claim`, {
+      const response = await fetch(`https://probodham-cricket-registration.onrender.com/api/external-registrations/${registrationId}/payment-claim`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json"
