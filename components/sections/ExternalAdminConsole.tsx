@@ -381,7 +381,7 @@ export default function ExternalAdminConsole() {
     setStatus("Loading external registrations…");
     try {
       const res = await fetch(
-        `${apiBaseUrl()}/api/admin/external-registrations?limit=200`,
+        `https://probodham-cricket-registration.onrender.com/api/admin/external-registrations?limit=200`,
         {
           headers: {
             "X-Admin-Username": creds.username,
@@ -434,7 +434,7 @@ export default function ExternalAdminConsole() {
     setLoginLoading(true);
     setStatus("Checking admin login…");
     try {
-      const res = await fetch(`${apiBaseUrl()}/api/admin/login`, {
+      const res = await fetch(`https://probodham-cricket-registration.onrender.com/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
@@ -482,7 +482,7 @@ export default function ExternalAdminConsole() {
     };
     try {
       const res = await fetch(
-        `${apiBaseUrl()}/api/admin/external-registrations/${player.id}/payment`,
+        `https://probodham-cricket-registration.onrender.com/api/admin/external-registrations/${player.id}/payment`,
         {
           method: "PATCH",
           headers: {
@@ -518,7 +518,7 @@ export default function ExternalAdminConsole() {
 
   async function fetchWhatsAppText() {
     const res = await fetch(
-      `${apiBaseUrl()}/api/admin/external-registrations/whatsapp?limit=200`,
+      `https://probodham-cricket-registration.onrender.com/api/admin/external-registrations/whatsapp?limit=200`,
       {
         headers: {
           "X-Admin-Username": credentials.username,
