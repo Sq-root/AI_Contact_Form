@@ -106,7 +106,7 @@ export default function RegisterForm() {
     setErrors({});
 
     const apiBase = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
-    const registerUrl = `${apiBase}/api/register`;
+    const registerUrl = `${apiBase}/api/registrations`;
 
     let res: Response;
     try {
