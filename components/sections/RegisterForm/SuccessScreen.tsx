@@ -13,7 +13,7 @@ type PaymentClaimState = {
 const paymentConfig = {
   upiId: process.env.NEXT_PUBLIC_UPI_ID || "sondagarchirag01-2@okicici",
   payeeName: process.env.NEXT_PUBLIC_UPI_PAYEE_NAME || "CHIRAG RATILAL SONDAGAR",
-  amount: process.env.NEXT_PUBLIC_UPI_AMOUNT || "350",
+  amount: process.env.NEXT_PUBLIC_UPI_AMOUNT || "500",
   notePrefix: process.env.NEXT_PUBLIC_UPI_NOTE_PREFIX || `${APL_SEASON.leagueShort} Reg`
 };
 
@@ -245,25 +245,25 @@ export function SuccessScreen({
         </div>
       </div>
 
-      <section className="mt-10 grid w-full max-w-[460px] gap-5 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+      <section className="mt-10 grid w-full max-w-[460px] gap-4 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:gap-5 sm:p-6">
         <div className="grid gap-2">
           <span className="font-mono text-[10px] tracking-[2.5px] text-apl-yellow">PAYMENT NEXT STEP</span>
-          <h2 className="font-anton text-[34px] uppercase leading-[0.92] text-white md:text-[42px]">
+          <h2 className="font-anton text-[28px] uppercase leading-[0.92] text-white sm:text-[34px] md:text-[42px]">
             Pay Rs. {paymentAmount()} via UPI
           </h2>
-          <p className="m-0 text-[14px] leading-7 text-white/60">
+          <p className="m-0 text-[13px] leading-6 text-white/60 sm:text-[14px] sm:leading-7">
             Scan the QR code first for the most reliable payment flow. You can also copy the UPI ID,
             copy the payment note, or try opening a UPI app directly.
           </p>
         </div>
 
-        <div className="grid place-items-center gap-3 border border-apl-yellow/15 bg-black/25 px-5 py-6 text-center">
+        <div className="grid place-items-center gap-3 rounded-[20px] border border-apl-yellow/15 bg-black/25 px-4 py-6 text-center sm:px-5">
           <img
             src={qrCodeUrl}
             alt="UPI payment QR code"
-            className="h-[180px] w-[180px] rounded-[18px] border-[8px] border-white bg-white"
+            className="h-auto w-full max-w-[180px] rounded-[18px] border-[8px] border-white bg-white"
           />
-          <strong className="font-anton text-[24px] uppercase tracking-[0.04em] text-white">
+          <strong className="font-anton text-[22px] uppercase tracking-[0.04em] text-white sm:text-[24px]">
             Scan QR to pay
           </strong>
           <small className="max-w-[320px] text-[12px] leading-6 tracking-[0.08em] text-white/45">
@@ -293,21 +293,21 @@ export function SuccessScreen({
           <button
             type="button"
             onClick={() => void copyPaymentText(paymentConfig.upiId, "UPI ID copied.")}
-            className="rounded-[20px] border border-white/[0.14] px-4 py-4 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
+            className="flex min-h-[52px] items-center justify-center rounded-[20px] border border-white/[0.14] px-4 py-3 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
           >
             COPY UPI ID
           </button>
           <button
             type="button"
             onClick={() => void copyPaymentText(paymentNote, "Payment note copied.")}
-            className="rounded-[20px] border border-white/[0.14] px-4 py-4 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
+            className="flex min-h-[52px] items-center justify-center rounded-[20px] border border-white/[0.14] px-4 py-3 font-mono text-[10px] tracking-[2px] text-white/75 transition hover:border-apl-yellow hover:text-apl-yellow"
           >
             COPY NOTE
           </button>
           <a
             href={upiOpenAppUri}
             onClick={markPaymentAppOpened}
-            className="rounded-[20px] bg-apl-red px-4 py-4 text-center font-anton text-[14px] tracking-[2px] text-white transition hover:bg-red-600"
+            className="flex min-h-[52px] items-center justify-center rounded-[20px] bg-apl-red px-4 py-3 text-center font-anton text-[14px] tracking-[2px] text-white transition hover:bg-red-600"
           >
             OPEN UPI APP
           </a>
