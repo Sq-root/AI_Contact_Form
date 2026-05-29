@@ -3,6 +3,8 @@ import { DatabaseError } from "pg";
 import { getDb } from "@/lib/db";
 
 const SOURCE_SYSTEM = "AI_CONTACT_FORM";
+const DEFAULT_PLAYER_ROLE = "PLAYER";
+const DEFAULT_SABHA_SHORT_CODE = "UNKNOWN";
 
 interface RegisterPayload {
   fullName: string;
@@ -13,12 +15,65 @@ interface RegisterPayload {
   referenceName: string;
   playingRole: string;
   sabhaLike: string;
+  playerRole?: string;
+  sabhaShortCode?: string;
   otherTopics?: string;
   imageUrls?: string[];
 }
 
 function normalizePhone(value: string) {
   return value.replace(/[\s\-()+]/g, "");
+}
+
+function cleanText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function parseOriginList(value: string | undefined) {
+  return new Set(
+    (value || "")
+      .split(/\s*,\s*/)
+      .map((origin) => normalizeOrigin(origin))
+      .filter(Boolean)
+  );
+}
+
+function parseOriginCodeMap(value: string | undefined) {
+  return new Map(
+    (value || "")
+      .split(/\s*,\s*/)
+      .map((entry) => entry.split("=", 2))
+      .filter((parts): parts is [string, string] => parts.length === 2)
+      .map(([origin, code]) => [normalizeOrigin(origin), cleanText(code)])
+      .filter(([, code]) => Boolean(code))
+  );
+}
+
+function normalizeOrigin(value: string | null | undefined) {
+  return (value || "").trim().replace(/\/+$/, "");
+}
+
+function requestOrigin(req: NextRequest) {
+  const origin = normalizeOrigin(req.headers.get("origin"));
+  if (origin) return origin;
+
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  if (!host) return "";
+
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  return normalizeOrigin(`${proto}://${host}`);
+}
+
+function resolveSabhaShortCode(req: NextRequest, submittedSabhaShortCode?: string) {
+  const origin = requestOrigin(req);
+  const allowedOrigins = parseOriginList(process.env.APP_CORS_ALLOWED_ORIGINS);
+  const mappedCodes = parseOriginCodeMap(process.env.APP_ORIGIN_SABHA_SHORT_CODES);
+
+  if ((!allowedOrigins.size || allowedOrigins.has(origin)) && mappedCodes.has(origin)) {
+    return mappedCodes.get(origin) || DEFAULT_SABHA_SHORT_CODE;
+  }
+
+  return cleanText(submittedSabhaShortCode) || DEFAULT_SABHA_SHORT_CODE;
 }
 
 function serverValidate(body: RegisterPayload): string | null {
@@ -74,6 +129,8 @@ export async function POST(req: NextRequest) {
   const statusId = crypto.randomUUID();
   const mappingId = crypto.randomUUID();
   const now = new Date();
+  const playerRole = cleanText(body.playerRole) || DEFAULT_PLAYER_ROLE;
+  const sabhaShortCode = resolveSabhaShortCode(req, body.sabhaShortCode);
 
   try {
     await client.query("begin");
@@ -90,12 +147,14 @@ export async function POST(req: NextRequest) {
          reference_name,
          playing_role,
          sabha_like,
+         player_role,
+         sabha_short_code,
          other_topics,
          image_urls,
          created_at,
          updated_at
        ) values (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16
        )`,
       [
         externalId,
@@ -108,6 +167,8 @@ export async function POST(req: NextRequest) {
         body.referenceName.trim(),
         body.playingRole,
         body.sabhaLike,
+        playerRole,
+        sabhaShortCode,
         body.otherTopics?.trim() || null,
         body.imageUrls ?? [],
         now,
